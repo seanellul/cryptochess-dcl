@@ -294,10 +294,13 @@ engine.addSystem(new FloatMove())
 spawnElevators()
 
 // Reset game
-let button = spawnEntity(new BoxShape(), new Vector3(3.5,0,2.5))
+const button = spawnEntity(new BoxShape(), new Vector3(2.5, 0.5, 7))
+button.getComponent(Transform).scale = new Vector3(0.5, 1, 0.5)
 
 button.addComponent(new OnPointerDown((e)=>{
   sceneMessageBus.emit("reset", {})
+}, {
+  hoverText: "Reset the board"
 }))
 
 function reset(){
