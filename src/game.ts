@@ -15,7 +15,7 @@ let currentInHand: any = null
 let prevPos: IEntity | null = null
 let turn: string = WHITE
 
-// // sounds
+// sounds
 const pickupSound = initSound("sounds/pickedup.mp3")
 const eathenSound = initSound("sounds/eaten.mp3")
 const placedSound = initSound("sounds/placed.mp3")
@@ -76,7 +76,6 @@ function placePiece(box: IEntity) {
     box.getComponent(BoardCellFlag).piece = currentInHand
     currentInHand = null
 
-    // resetBoxColours()    
   }
 
   enableInteractableBox(false)
@@ -92,7 +91,6 @@ function enableInteractableBox(interactable: boolean) {
       let boxOnClick = new OnPointerDown(() => {
         placedSound.getComponent(AudioSource).playOnce()
         
-        // also need to add for TakeThePiece 
         sceneMessageBus.emit('placePiece', {puuid: prevPos!.uuid, buuid: box.uuid, currentInHand: currentInHand?.uuid})
     
         placePiece(box)
@@ -159,8 +157,6 @@ function enableInteractablePiece(interactable: boolean) {
             if (box.getComponent(BoardCellFlag).piece! === piece) {
               box.getComponent(BoardCellFlag).vacant = true
               prevPos = box
-              // remove for now
-              // displayValidMoves(box)
               box.getComponent(BoardCellFlag).piece = null
             }
           }
@@ -275,6 +271,24 @@ function addPieces() {
     }
   }
 }
+
+// make pawns float
+const pawnGroup = engine.getComponentGroup(IsPawn)
+
+let fraction = 0
+export class FloatMove implements ISystem {
+  update(dt: number) {
+    for (let pawn of pawnGroup.entities) {
+      let transform = pawn.getComponent(Transform)
+      fraction += dt/30  // speed
+      const magnitude = 10
+      const height = 0.5
+      transform.position.y = height + Math.sin(Math.PI * fraction) / magnitude
+    }
+  }
+}
+
+engine.addSystem(new FloatMove())
 
 makeChessBoard()
 addPieces()
