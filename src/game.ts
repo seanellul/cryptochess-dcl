@@ -8,8 +8,10 @@ let turn: string = WHITE
 
 const whitePieces = ["Rook", "Knight", "Bishop", "Queen", "King", "Bishop", "Knight", "Rook", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn"]
 const blackPieces = ["Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Rook", "Knight", "Bishop", "Queen", "King", "Bishop", "Knight", "Rook"]
+//  initialize board matrix
+let boardMatrix: Entity[][]     // not used so far
 
-const pieceHeight = 1
+const pieceHeight = 0.5
 
 const piecePlaceholder = new BoxShape()
 
@@ -23,6 +25,43 @@ function spawnEntity(shape: Shape, position: Vector3, rotation?: Quaternion) {
   return entity
 }
 
+
+// Video billboard
+// Make it smaller?
+const myVideoClip = new VideoClip(
+  "videos/bladerunner540.mp4"
+)
+const myVideoTexture = new VideoTexture(myVideoClip)
+const myMaterial = new Material()
+myMaterial.albedoColor = new Color3(1.5, 1.5, 1.5)
+myMaterial.albedoTexture = myVideoTexture
+myMaterial.roughness = 1
+myMaterial.specularIntensity = 1
+myMaterial.metallic = 0
+const screen = new Entity()
+screen.addComponent(new PlaneShape())
+screen.addComponent(
+  new Transform({
+    position: new Vector3(8, 3, 15.7),
+    scale: new Vector3(16, 7, 1),
+    rotation: new Quaternion(0, 180)
+  })
+)
+screen.addComponent(myMaterial)
+screen.addComponent(
+  new OnPointerDown(() => {
+    myVideoTexture.playing = !myVideoTexture.playing
+  })
+)
+screen.removeComponent(OnPointerDown)
+engine.addEntity(screen)
+myVideoTexture.loop = true
+myVideoTexture.play()
+
+
+const board = spawnEntity(new GLTFShape("models/Doska.glb"), new Vector3(8, 0, 8)) 
+
+
 @Component("boardCellFlag")
 export class BoardCellFlag {
   vacant: boolean
@@ -35,16 +74,17 @@ export class BoardCellFlag {
 
   }
 }
-
 function makeChessBoard() {
   let offset = 3.5
+  boardMatrix = []
   for(let row = 1; row < 9; row++) {
+    boardMatrix[row] = []
     for(let col = 1; col < 9; col++) {
      
 
-      // const tileModel = ((row + col) % 2 == 1) ? new GLTFShape("models/Tile_yellow.glb") : new GLTFShape("models/Tile_purple.glb")
+      const tileModel = ((row + col) % 2 == 1) ? new GLTFShape("models/Tile_yellow.glb") : new GLTFShape("models/Tile_purple.glb")
 
-      let box = spawnEntity(new BoxShape(), new Vector3(offset + col, 0.2, offset + row))
+      let box = spawnEntity(tileModel, new Vector3(offset + col, 0.2, offset + row))
       box.addComponent(new BoardCellFlag())
       
       const boardMaterial = new Material()
@@ -52,9 +92,12 @@ function makeChessBoard() {
       boardMaterial.albedoColor = boxColour
       boardMaterial.metallic = 1.0
       boardMaterial.roughness = 0.0
-      box.addComponent(boardMaterial)
+      // box.addComponent(boardMaterial)
 
       box.getComponent(BoardCellFlag).baseColour = boxColour
+
+      // populate matrix
+      boardMatrix[row][col] = box
     }
   }
 }
