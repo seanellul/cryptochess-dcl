@@ -18,3 +18,33 @@ export function spawnEntity(shape: Shape, position: Vector3, rotation?: Quaterni
     
     return entity
 }
+
+
+let outWhitePos = -1
+export const nextValidOutsideWhiteCell = () => {
+  if (outWhitePos < outsideCellsWhite.length - 1)
+    outWhitePos++
+  return outsideCellsWhite[outWhitePos]
+}
+let outBlackPos = -1
+export const nextValidOutsideBlackCell = () => {
+  if (outBlackPos < outsideCellsBlack.length - 1)
+    outBlackPos++
+  return outsideCellsBlack[outBlackPos]
+}
+
+function initOutsideCells(offsetX: number, offsetZ: number) {
+  let list = [] 
+  for (let i = 0; i < 2; i++) {
+    for (let j = 0; j < 10; j++){
+      if (j != 4 && j != 5) {
+        list.push(new Vector3(offsetX + j ,0, offsetZ - i))
+        // spawnEntity(new BoxShape(), new Vector3(offsetX + j ,0, offsetZ - i))
+      }
+    }
+  }
+  return list  
+}
+
+let outsideCellsWhite = initOutsideCells(3.5, 14)
+let outsideCellsBlack = initOutsideCells(3.5, 3)

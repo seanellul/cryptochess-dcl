@@ -1,54 +1,33 @@
-import { initSound, spawnEntity } from "helpers"
-import { WhitePiece, BlackPiece } from "pieces"
+import { 
+  initSound, 
+  spawnEntity, 
+  nextValidOutsideWhiteCell, 
+  nextValidOutsideBlackCell
+ } from "helpers"
+import { whitePieces, blackPieces } from "pieces"
+import { addBillboard } from "billboard"
+import { sceneMessageBus } from "messageBus"
 
 const WHITE = "white"
 const BLACK = "black"
 
 let currentInHand: any = null
+let prevPos: IEntity | null = null
 let turn: string = WHITE
 
 // // sounds
 const pickupSound = initSound("sounds/pickedup.mp3")
+const eathenSound = initSound("sounds/eaten.mp3")
 const placedSound = initSound("sounds/placed.mp3")
+const resetSound = initSound("sounds/reset.mp3")
+const background = initSound("sounds/179_cyberpunk_city.mp3")
 
-const whitePiece = new WhitePiece()
-const blackPiece = new BlackPiece()
-const whitePieces = [whitePiece.Rook, whitePiece.Knight, whitePiece.Bishop, whitePiece.Queen, whitePiece.King, whitePiece.Bishop, whitePiece.Knight, whitePiece.Rook, whitePiece.Pawn, whitePiece.Pawn, whitePiece.Pawn, whitePiece.Pawn, whitePiece.Pawn, whitePiece.Pawn, whitePiece.Pawn, whitePiece.Pawn]
-const blackPieces = [blackPiece.Pawn, blackPiece.Pawn, blackPiece.Pawn, blackPiece.Pawn, blackPiece.Pawn, blackPiece.Pawn, blackPiece.Pawn, blackPiece.Pawn, blackPiece.Rook, blackPiece.Knight, blackPiece.Bishop, blackPiece.Queen, blackPiece.King, blackPiece.Bishop, blackPiece.Knight, blackPiece.Rook]
+background.getComponent(AudioSource).loop = true
+background.getComponent(AudioSource).playing = true
 
 const pieceHeight = 0.3
 
-// Video billboard
-// Make it smaller?
-const myVideoClip = new VideoClip(
-  "videos/bladerunner540.mp4"
-)
-const myVideoTexture = new VideoTexture(myVideoClip)
-const myMaterial = new Material()
-myMaterial.albedoColor = new Color3(1.5, 1.5, 1.5)
-myMaterial.albedoTexture = myVideoTexture
-myMaterial.roughness = 1
-myMaterial.specularIntensity = 1
-myMaterial.metallic = 0
-const screen = new Entity()
-screen.addComponent(new PlaneShape())
-screen.addComponent(
-  new Transform({
-    position: new Vector3(8, 3, 15.7),
-    scale: new Vector3(16, 7, 1),
-    rotation: new Quaternion(0, 180)
-  })
-)
-screen.addComponent(myMaterial)
-screen.addComponent(
-  new OnPointerDown(() => {
-    myVideoTexture.playing = !myVideoTexture.playing
-  })
-)
-screen.removeComponent(OnPointerDown)
-engine.addEntity(screen)
-myVideoTexture.loop = true
-myVideoTexture.play()
+addBillboard()
 
 const board = spawnEntity(new GLTFShape("models/Doska.glb"), new Vector3(8, 0, 8)) 
 const pol = spawnEntity(new GLTFShape("models/Pol.glb"), new Vector3(8, 0, 8))
@@ -58,11 +37,9 @@ const neonInt = spawnEntity(new GLTFShape("models/Neon_interior.glb"), new Vecto
 export class BoardCellFlag {
   vacant: boolean
   piece: null | IEntity
-  baseColour: Color3
-  constructor(vacant: boolean = true, piece: null | IEntity = null, baseColour: Color3 = Color3.White()) {
+  constructor(vacant: boolean = true, piece: null | IEntity = null) {
     this.vacant = vacant
     this.piece = piece
-    this.baseColour = baseColour
 
   }
 }
@@ -70,61 +47,73 @@ function makeChessBoard() {
   let offset = 3.5
   for(let row = 1; row < 9; row++) {
     for(let col = 1; col < 9; col++) {
-     
-
       const tileModel = ((row + col) % 2 == 1) ? new GLTFShape("models/Binance_plane.glb") : new GLTFShape("models/Etherium_plane.glb")
       let box = spawnEntity(tileModel, new Vector3(offset + col, 0.2, offset + row))
       box.getComponent(Transform).rotate(new Vector3(0,1,0), 180)
       box.addComponent(new BoardCellFlag())
-      
-      const boardMaterial = new Material()
-      const boxColour = boardMaterial.albedoColor = ((row + col) % 2 == 1) ? Color3.Gray() : Color3.White()
-      boardMaterial.albedoColor = boxColour
-      boardMaterial.metallic = 1.0
-      boardMaterial.roughness = 0.0
-      // box.addComponent(boardMaterial)
-
-      box.getComponent(BoardCellFlag).baseColour = boxColour
-
     }
   }
 }
 
 const boxGroup = engine.getComponentGroup(BoardCellFlag)
 
+function placePiece(box: IEntity) {
+  let boxPosition = box.getComponent(Transform).position
+
+  if (currentInHand) {
+    currentInHand.getComponent(Transform).position = new Vector3(boxPosition.x, pieceHeight, boxPosition.z)
+    currentInHand.setParent(null)
+    
+    currentInHand.getComponent(GLTFShape).isPointerBlocker = true  
+
+    // place back to the same cell and don't loose a turn
+    if (prevPos != box) {
+      turn = currentInHand.getComponent(PieceFlag).color == WHITE ? BLACK : WHITE
+    }
+    prevPos = null
+
+    box.getComponent(BoardCellFlag).vacant = false
+    box.getComponent(BoardCellFlag).piece = currentInHand
+    currentInHand = null
+
+    // resetBoxColours()    
+  }
+
+  enableInteractableBox(false)
+  enableInteractableEnemy(false)
+  enableInteractablePiece(true)
+}
+
 function enableInteractableBox(interactable: boolean) {
-
+  
   for (let box of boxGroup.entities) {
-    // TODO: replace with onPointerDown with HintText and maximum click distance
-    let boxOnClick = new OnPointerDown(() => {
-      placedSound.getComponent(AudioSource).playOnce()
-      let boxPosition = box.getComponent(Transform).position
+    if (interactable && box.getComponent(BoardCellFlag).vacant) {
+      // TODO: set maximum click distance?
+      let boxOnClick = new OnPointerDown(() => {
+        placedSound.getComponent(AudioSource).playOnce()
+        
+        // also need to add for TakeThePiece 
+        sceneMessageBus.emit('placePiece', {puuid: prevPos!.uuid, buuid: box.uuid, currentInHand: currentInHand?.uuid})
+    
+        placePiece(box)
+      },
+      {
+        hoverText: "Place the piece"
+      })
 
-      if (currentInHand) {
-        currentInHand.getComponent(Transform).position = new Vector3(boxPosition.x, pieceHeight, boxPosition.z)
-        currentInHand.setParent(null)
-        currentInHand.getComponent(GLTFShape).isPointerBlocker = true
-
-        turn = currentInHand.getComponent(PieceFlag).color == WHITE ? BLACK : WHITE
-        currentInHand = null
-      }
-
-      enableInteractableBox(false)
-      enableInteractablePiece(true)
-
-    },
-    {
-      hoverText: "Place the piece"
-    })
-
-    if (interactable) {
+    
       box.addComponent(boxOnClick)
-
     } else {
-      box.removeComponent(boxOnClick)
+      if (box.hasComponent(OnPointerDown)) 
+        box.removeComponent(OnPointerDown)
     }
   }
 }
+
+sceneMessageBus.on('placePiece', (info: any) => {
+  const newBox = boxGroup.entities.filter((box) => {return box.uuid == info.buuid})[0]
+  placePiece(newBox)
+})
 
 @Component("pieceFlag")
 export class PieceFlag {
@@ -143,30 +132,115 @@ export class PieceFlag {
 const pieceGroup = engine.getComponentGroup(PieceFlag)
 
 function enableInteractablePiece(interactable: boolean) {
-
+  
   for (let piece of pieceGroup.entities) {
-    let pieceOnClick = new OnPointerDown(() => {
-      pickupSound.getComponent(AudioSource).playOnce()
-      piece.getComponent(Transform).position = new Vector3(0, 0, 1)
-      piece.setParent(Attachable.AVATAR)
-      piece.getComponent(GLTFShape).isPointerBlocker = false
-      currentInHand = piece
+    if (
+      interactable &&
+      piece.getComponent(PieceFlag).color == turn &&
+      piece.getComponent(PieceFlag).active == true
+      ) {
+    
+      let pieceOnClick = new OnPointerDown(() => {
+        pickupSound.getComponent(AudioSource).playOnce()
 
-      enableInteractablePiece(false)
-      enableInteractableBox(true)
-    },
-    {
-      hoverText: "Pick the " + piece.getComponent(PieceFlag).name
-    })
+        piece.getComponent(Transform).position = new Vector3(0, 0, 1)
+        piece.setParent(Attachable.AVATAR)
 
-    if (interactable) {
-      if (piece.getComponent(PieceFlag).color == turn)
-        piece.addComponent(pieceOnClick)
+        piece.getComponent(GLTFShape).isPointerBlocker = false  
+        
+        // TODO: Make transparent as it block the view in 1st person view 
+
+        currentInHand = piece
+
+        sceneMessageBus.emit("pickupPiece", {currentInHand: currentInHand.uuid})
+
+        for (let box of boxGroup.entities) {
+          if (box.getComponent(BoardCellFlag).piece) {
+            if (box.getComponent(BoardCellFlag).piece! === piece) {
+              box.getComponent(BoardCellFlag).vacant = true
+              prevPos = box
+              // remove for now
+              // displayValidMoves(box)
+              box.getComponent(BoardCellFlag).piece = null
+            }
+          }
+        }
+
+        enableInteractablePiece(false)
+        enableInteractableEnemy(true)
+        enableInteractableBox(true)
+      },
+      {
+        hoverText: "Pick the " + piece.getComponent(PieceFlag).name
+      })
+
+      piece.addComponent(pieceOnClick)
     } else {
-      piece.removeComponent(pieceOnClick)
+      if (piece.hasComponent(OnPointerDown)) 
+        piece.removeComponent(OnPointerDown)
     }
   }
 }
+sceneMessageBus.on("pickupPiece", (info) => {
+  enableInteractablePiece(false)
+  currentInHand = pieceGroup.entities.filter((piece) => {return piece.uuid == info.currentInHand})[0]
+
+  for (let box of boxGroup.entities) {
+    if (box.getComponent(BoardCellFlag).piece) {
+      if (box.getComponent(BoardCellFlag).piece! === currentInHand) {
+        box.getComponent(BoardCellFlag).vacant = true
+        prevPos = box
+        box.getComponent(BoardCellFlag).piece = null
+      }
+    }
+  }
+
+})
+
+
+function enableInteractableEnemy(interactable: boolean) {
+  for (let piece of pieceGroup.entities) {
+    if (
+      interactable &&
+      piece.getComponent(PieceFlag).color != turn &&
+      piece.getComponent(PieceFlag).active == true
+      ) {
+
+      let pieceOnClick = new OnPointerDown(() => {
+        
+        const box = boxGroup.entities.filter((box) => {return box.getComponent(BoardCellFlag).piece! == piece})[0]
+        eathenSound.getComponent(AudioSource).playOnce()
+        
+        sceneMessageBus.emit("takePiece", {pieceId: piece.uuid, boxId: box.uuid, prevPos: prevPos?.uuid, currentInHand: currentInHand?.uuid})
+
+        placePiece(box)
+      },
+      {
+        hoverText: "Take the enemy " + piece.getComponent(PieceFlag).name
+      })     
+
+      piece.addComponent(pieceOnClick)
+    } else {
+      if (piece.hasComponent(OnPointerDown)) 
+        piece.removeComponent(OnPointerDown)
+    }
+  }
+}
+
+sceneMessageBus.on('takePiece', (info) => {
+  const newBox = boxGroup.entities.filter((box) => {return box.uuid == info.boxId})[0]
+  const piece = pieceGroup.entities.filter((piece) => {return piece.uuid == info.pieceId})[0]
+
+  if (piece.getComponent(PieceFlag).color == WHITE) {
+    piece.getComponent(Transform).position = nextValidOutsideWhiteCell()
+  } else {
+    piece.getComponent(Transform).position = nextValidOutsideBlackCell()
+  }
+  // disable piece
+  piece.getComponent(PieceFlag).active = false
+
+  placePiece(newBox)
+})
 
 @Component("isPawn")
 export class IsPawn {}
