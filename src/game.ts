@@ -1,4 +1,4 @@
-
+import { initSound, spawnEntity } from "helpers"
 
 const WHITE = "white"
 const BLACK = "black"
@@ -6,39 +6,40 @@ const BLACK = "black"
 let currentInHand: any = null
 let turn: string = WHITE
 
-
-function initSound(path: string) {
-  const entity =  new Entity()
-  engine.addEntity(entity)
-  entity.addComponent(
-    new AudioSource(new AudioClip(path))
-  )
-  entity.getComponentOrCreate(Transform).position = new Vector3(8,0,8)
-  return entity
-}
-
 // // sounds
 const pickupSound = initSound("sounds/pickedup.mp3")
 const placedSound = initSound("sounds/placed.mp3")
 
-const whitePieces = ["Rook", "Knight", "Bishop", "Queen", "King", "Bishop", "Knight", "Rook", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn"]
-const blackPieces = ["Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Rook", "Knight", "Bishop", "Queen", "King", "Bishop", "Knight", "Rook"]
+
+class WhitePiece {
+  public King = {number: 1, name: "King", model: new GLTFShape("models/King.glb")}
+  public Pawn = {number: 2, name: "Pawn", model: new GLTFShape("models/Etherum.glb")}
+  public Knight = {number: 3, name: "Knight", model: new GLTFShape("models/Horse_White.glb")}
+  public Bishop = {number: 4, name: "Bishop", model: new GLTFShape("models/Slon_white.glb")}
+  public Rook = {number: 5, name: "Rook", model: new GLTFShape("models/Ladja_white.glb")}
+  public Queen = {number: 6, name: "Queen", model: new GLTFShape("models/Queen_white.glb")}
+}
+class BlackPiece {
+  public King = {number: 1, name: "King", model: new GLTFShape("models/King.glb")}
+  public Pawn = {number: 2, name: "Pawn", model: new GLTFShape("models/Binance.glb")}
+  public Knight = {number: 3, name: "Knight", model: new GLTFShape("models/Horse_White.glb")}
+  public Bishop = {number: 4, name: "Bishop", model: new GLTFShape("models/Slon_Black.glb")}
+  public Rook = {number: 5, name: "Rook", model: new GLTFShape("models/Ladja_black.glb")}
+  public Queen = {number: 6, name: "Queen", model: new GLTFShape("models/Queen_black.glb")}
+}
+
+const whitePiece = new WhitePiece()
+const blackPiece = new BlackPiece()
+const whitePieces = [whitePiece.Rook, whitePiece.Knight, whitePiece.Bishop, whitePiece.Queen, whitePiece.King, whitePiece.Bishop, whitePiece.Knight, whitePiece.Rook, whitePiece.Pawn, whitePiece.Pawn, whitePiece.Pawn, whitePiece.Pawn, whitePiece.Pawn, whitePiece.Pawn, whitePiece.Pawn, whitePiece.Pawn]
+const blackPieces = [blackPiece.Pawn, blackPiece.Pawn, blackPiece.Pawn, blackPiece.Pawn, blackPiece.Pawn, blackPiece.Pawn, blackPiece.Pawn, blackPiece.Pawn, blackPiece.Rook, blackPiece.Knight, blackPiece.Bishop, blackPiece.Queen, blackPiece.King, blackPiece.Bishop, blackPiece.Knight, blackPiece.Rook]
+
+
 //  initialize board matrix
 let boardMatrix: Entity[][]     // not used so far
 
-const pieceHeight = 0.5
+const pieceHeight = 0.3
 
 const piecePlaceholder = new BoxShape()
-
-function spawnEntity(shape: Shape, position: Vector3, rotation?: Quaternion) {
-  const entity = new Entity()
-
-  entity.addComponent(new Transform({ position: position, rotation }))
-  entity.addComponent(shape)
-  engine.addEntity(entity)
-
-  return entity
-}
 
 
 // Video billboard
@@ -97,9 +98,9 @@ function makeChessBoard() {
     for(let col = 1; col < 9; col++) {
      
 
-      const tileModel = ((row + col) % 2 == 1) ? new GLTFShape("models/Tile_yellow.glb") : new GLTFShape("models/Tile_purple.glb")
-
+      const tileModel = ((row + col) % 2 == 1) ? new GLTFShape("models/Binance_plane.glb") : new GLTFShape("models/Etherium_plane.glb")
       let box = spawnEntity(tileModel, new Vector3(offset + col, 0.2, offset + row))
+      box.getComponent(Transform).rotate(new Vector3(0,1,0), 180)
       box.addComponent(new BoardCellFlag())
       
       const boardMaterial = new Material()
@@ -157,9 +158,13 @@ function enableInteractableBox(interactable: boolean) {
 export class PieceFlag {
   color: string
   name: string
-  constructor(color: string, name: string) {
+  number: number
+  active: boolean
+  constructor(color: string, name: string, number: number, active: boolean = true) {
     this.color = color
     this.name = name
+    this.number = number
+    this.active = active
   }
 }
 
@@ -194,34 +199,33 @@ function enableInteractablePiece(interactable: boolean) {
 @Component("isPawn")
 export class IsPawn {}
 
-function spawnPlaceholder(x: number, y: number, z: number) {
-  let piece = spawnEntity(piecePlaceholder, new Vector3(x, y, z), new Quaternion(0, 180, 180))
-  piece.getComponent(Transform).scale = new Vector3(0.5, 0.5, 1)
-  return piece
-}
-
 function addPieces() {
-  // should use boxGroup or board matrix
   for (let i = 0; i < boxGroup.entities.length; i++) {
     if (i < 16 || i > 47) {
       let box = boxGroup.entities[i]
       let x = box.getComponent(Transform).position.x
       let z = box.getComponent(Transform).position.z
 
-      // const piece = spawnPlaceholder(x, pieceHeight, z)
+      let piece = null
       box.getComponent(BoardCellFlag).vacant = false
-      const pieceMaterial = new Material()
-
+      
+      // might need to offset some figures
+      const pos = new Vector3(x, pieceHeight, z)
+      
       if (i > 47) {
-        const piece = spawnEntity(new GLTFShape('models/Etherum.glb'), new Vector3(x, pieceHeight, z))
-        pieceMaterial.albedoColor = Color3.Black()
-        piece.addComponent(new PieceFlag(BLACK, blackPieces[i - 48]))
+        let tempPiece = blackPieces[i - 48]
+        piece = spawnEntity(tempPiece.model, pos, new Quaternion(0, 180))
+        piece.addComponent(new PieceFlag(BLACK, tempPiece.name, tempPiece.number))
+        if (tempPiece.name == "Pawn") 
+          piece.addComponent(new IsPawn())
       } else if (i < 16){
-        const piece = spawnEntity(new GLTFShape('models/Binance.glb'), new Vector3(x, pieceHeight, z))
-        pieceMaterial.albedoColor = Color3.White()
-        piece.addComponent(new PieceFlag(WHITE, whitePieces[i]))
+        piece = spawnEntity(whitePieces[i].model, pos)
+        piece.addComponent(new PieceFlag(WHITE, whitePieces[i].name, whitePieces[i].number))
+        if (whitePieces[i].name == "Pawn") 
+          piece.addComponent(new IsPawn())
       }
 
+      box.getComponent(BoardCellFlag).piece = piece
     }
   }
 }
