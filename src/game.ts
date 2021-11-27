@@ -40,7 +40,7 @@ addBillboard(
 )
 
 addBillboard(
-  "videos/bladerunner540.mp4", 
+  "videos/bladerunner4.mp4", 
   new Transform({
     position: new Vector3(15.9, 3, 8),
     scale: new Vector3(16, 7, 1),
@@ -49,7 +49,7 @@ addBillboard(
 )
 
 addBillboard(
-  "videos/bladerunner540.mp4", 
+  "videos/bladerunner3.mp4", 
   new Transform({
     position: new Vector3(0.1, 3, 8),
     scale: new Vector3(16, 7, 1),
@@ -62,6 +62,7 @@ const pol = spawnEntity(new GLTFShape("models/Pol.glb"), new Vector3(8, 0, 8))
 const neonInt = spawnEntity(new GLTFShape("models/Neon_interior.glb"), new Vector3(8, 0, 9), new Quaternion(0, 180)) 
 const gambitBoard = spawnEntity(new GLTFShape("models/Tablica.glb"), new Vector3(0.5, 0, 8))
 gambitBoard.getComponent(Transform).rotate(new Vector3(0, 1, 0), 90)
+
 
 @Component("boardCellFlag")
 export class BoardCellFlag {
@@ -320,6 +321,10 @@ export class FloatMove implements ISystem {
 engine.addSystem(new FloatMove())
 
 spawnElevators()
+
+// undo / redo
+const undo = spawnEntity(new GLTFShape("models/Back_forward_buttons.glb"), new Vector3(2.5, 0, 8.5),  Quaternion.Euler(0, 180, 0))
+const redo = spawnEntity(new GLTFShape("models/Back_forward_buttons.glb"), new Vector3(2.5, 0, 8))
 
 // Reset game
 const button = spawnEntity(new BoxShape(), new Vector3(2.5, 0.5, 7))
