@@ -115,6 +115,8 @@ function enableInteractableBox(interactable: boolean) {
       if (currentInHand) {
         currentInHand.getComponent(Transform).position = new Vector3(boxPosition.x, pieceHeight, boxPosition.z)
         currentInHand.setParent(null)
+        currentInHand.getComponent(GLTFShape).isPointerBlocker = true
+
         turn = currentInHand.getComponent(PieceFlag).color == WHITE ? BLACK : WHITE
         currentInHand = null
       }
@@ -154,6 +156,7 @@ function enableInteractablePiece(interactable: boolean) {
     let pieceOnClick = new OnPointerDown(() => {
       piece.getComponent(Transform).position = new Vector3(0, 0, 1)
       piece.setParent(Attachable.AVATAR)
+      piece.getComponent(GLTFShape).isPointerBlocker = false
       currentInHand = piece
 
       enableInteractablePiece(false)
@@ -189,21 +192,20 @@ function addPieces() {
       let x = box.getComponent(Transform).position.x
       let z = box.getComponent(Transform).position.z
 
-      const piece = spawnPlaceholder(x, pieceHeight, z)
+      // const piece = spawnPlaceholder(x, pieceHeight, z)
       box.getComponent(BoardCellFlag).vacant = false
       const pieceMaterial = new Material()
 
       if (i > 47) {
+        const piece = spawnEntity(new GLTFShape('models/Etherum.glb'), new Vector3(x, pieceHeight, z))
         pieceMaterial.albedoColor = Color3.Black()
         piece.addComponent(new PieceFlag(BLACK, blackPieces[i - 48]))
       } else if (i < 16){
+        const piece = spawnEntity(new GLTFShape('models/Binance.glb'), new Vector3(x, pieceHeight, z))
         pieceMaterial.albedoColor = Color3.White()
         piece.addComponent(new PieceFlag(WHITE, whitePieces[i]))
       }
 
-      pieceMaterial.metallic = 0.6
-      pieceMaterial.roughness = 0.4
-      piece.addComponent(pieceMaterial)
     }
   }
 }
