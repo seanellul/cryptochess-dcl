@@ -1,4 +1,5 @@
 import { initSound, spawnEntity } from "helpers"
+import { WhitePiece, BlackPiece } from "pieces"
 
 const WHITE = "white"
 const BLACK = "black"
@@ -10,37 +11,12 @@ let turn: string = WHITE
 const pickupSound = initSound("sounds/pickedup.mp3")
 const placedSound = initSound("sounds/placed.mp3")
 
-
-class WhitePiece {
-  public King = {number: 1, name: "King", model: new GLTFShape("models/King.glb")}
-  public Pawn = {number: 2, name: "Pawn", model: new GLTFShape("models/Etherum.glb")}
-  public Knight = {number: 3, name: "Knight", model: new GLTFShape("models/Horse_White.glb")}
-  public Bishop = {number: 4, name: "Bishop", model: new GLTFShape("models/Slon_white.glb")}
-  public Rook = {number: 5, name: "Rook", model: new GLTFShape("models/Ladja_white.glb")}
-  public Queen = {number: 6, name: "Queen", model: new GLTFShape("models/Queen_white.glb")}
-}
-class BlackPiece {
-  public King = {number: 1, name: "King", model: new GLTFShape("models/King.glb")}
-  public Pawn = {number: 2, name: "Pawn", model: new GLTFShape("models/Binance.glb")}
-  public Knight = {number: 3, name: "Knight", model: new GLTFShape("models/Horse_White.glb")}
-  public Bishop = {number: 4, name: "Bishop", model: new GLTFShape("models/Slon_Black.glb")}
-  public Rook = {number: 5, name: "Rook", model: new GLTFShape("models/Ladja_black.glb")}
-  public Queen = {number: 6, name: "Queen", model: new GLTFShape("models/Queen_black.glb")}
-}
-
 const whitePiece = new WhitePiece()
 const blackPiece = new BlackPiece()
 const whitePieces = [whitePiece.Rook, whitePiece.Knight, whitePiece.Bishop, whitePiece.Queen, whitePiece.King, whitePiece.Bishop, whitePiece.Knight, whitePiece.Rook, whitePiece.Pawn, whitePiece.Pawn, whitePiece.Pawn, whitePiece.Pawn, whitePiece.Pawn, whitePiece.Pawn, whitePiece.Pawn, whitePiece.Pawn]
 const blackPieces = [blackPiece.Pawn, blackPiece.Pawn, blackPiece.Pawn, blackPiece.Pawn, blackPiece.Pawn, blackPiece.Pawn, blackPiece.Pawn, blackPiece.Pawn, blackPiece.Rook, blackPiece.Knight, blackPiece.Bishop, blackPiece.Queen, blackPiece.King, blackPiece.Bishop, blackPiece.Knight, blackPiece.Rook]
 
-
-//  initialize board matrix
-let boardMatrix: Entity[][]     // not used so far
-
 const pieceHeight = 0.3
-
-const piecePlaceholder = new BoxShape()
-
 
 // Video billboard
 // Make it smaller?
@@ -74,9 +50,9 @@ engine.addEntity(screen)
 myVideoTexture.loop = true
 myVideoTexture.play()
 
-
 const board = spawnEntity(new GLTFShape("models/Doska.glb"), new Vector3(8, 0, 8)) 
 const pol = spawnEntity(new GLTFShape("models/Pol.glb"), new Vector3(8, 0, 8))
+const neonInt = spawnEntity(new GLTFShape("models/Neon_interior.glb"), new Vector3(8, 0, 9), new Quaternion(0, 180)) 
 
 @Component("boardCellFlag")
 export class BoardCellFlag {
@@ -92,9 +68,7 @@ export class BoardCellFlag {
 }
 function makeChessBoard() {
   let offset = 3.5
-  boardMatrix = []
   for(let row = 1; row < 9; row++) {
-    boardMatrix[row] = []
     for(let col = 1; col < 9; col++) {
      
 
@@ -112,8 +86,6 @@ function makeChessBoard() {
 
       box.getComponent(BoardCellFlag).baseColour = boxColour
 
-      // populate matrix
-      boardMatrix[row][col] = box
     }
   }
 }
