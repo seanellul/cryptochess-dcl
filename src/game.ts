@@ -75,7 +75,7 @@ myVideoTexture.play()
 
 
 const board = spawnEntity(new GLTFShape("models/Doska.glb"), new Vector3(8, 0, 8)) 
-
+const pol = spawnEntity(new GLTFShape("models/Pol.glb"), new Vector3(8, 0, 8))
 
 @Component("boardCellFlag")
 export class BoardCellFlag {
