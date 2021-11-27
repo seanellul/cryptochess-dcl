@@ -6,6 +6,21 @@ const BLACK = "black"
 let currentInHand: any = null
 let turn: string = WHITE
 
+
+function initSound(path: string) {
+  const entity =  new Entity()
+  engine.addEntity(entity)
+  entity.addComponent(
+    new AudioSource(new AudioClip(path))
+  )
+  entity.getComponentOrCreate(Transform).position = new Vector3(8,0,8)
+  return entity
+}
+
+// // sounds
+const pickupSound = initSound("sounds/pickedup.mp3")
+const placedSound = initSound("sounds/placed.mp3")
+
 const whitePieces = ["Rook", "Knight", "Bishop", "Queen", "King", "Bishop", "Knight", "Rook", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn"]
 const blackPieces = ["Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Rook", "Knight", "Bishop", "Queen", "King", "Bishop", "Knight", "Rook"]
 //  initialize board matrix
@@ -109,7 +124,7 @@ function enableInteractableBox(interactable: boolean) {
   for (let box of boxGroup.entities) {
     // TODO: replace with onPointerDown with HintText and maximum click distance
     let boxOnClick = new OnPointerDown(() => {
-
+      placedSound.getComponent(AudioSource).playOnce()
       let boxPosition = box.getComponent(Transform).position
 
       if (currentInHand) {
@@ -154,6 +169,7 @@ function enableInteractablePiece(interactable: boolean) {
 
   for (let piece of pieceGroup.entities) {
     let pieceOnClick = new OnPointerDown(() => {
+      pickupSound.getComponent(AudioSource).playOnce()
       piece.getComponent(Transform).position = new Vector3(0, 0, 1)
       piece.setParent(Attachable.AVATAR)
       piece.getComponent(GLTFShape).isPointerBlocker = false
