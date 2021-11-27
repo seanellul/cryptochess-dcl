@@ -1,4 +1,5 @@
 import { spawnEntity } from "helpers"
+import { sceneMessageBus } from "messageBus"
 // Elevator logic
 
 @Component("lerpData")
@@ -12,10 +13,9 @@ export class LerpData {
     this.fraction = fraction
   }
 }
-
 export class LerpMove implements ISystem {
   update(dt: number) {
-    for (let el of elevatorGroup.entities){
+    for (let el of elevatorGroup.entities) {
       if (el.hasComponent(LerpData)) {
         let transform = el.getComponent(Transform)
         let lerp = el.getComponent(LerpData)
@@ -55,11 +55,14 @@ export function spawnElevators() {
       const pos = el.getComponent(Transform).position
       const posTop = new Vector3(pos.x , 4, pos.z)
       const posBottom = new Vector3(pos.x , 0, pos.z)
+
+
       const onClickUp = new OnPointerDown(() => {
         el.addComponentOrReplace(new LerpData(el.getComponent(Transform).position, posTop, 0))
         if (el.hasComponent(OnPointerDown))
           el.removeComponent(OnPointerDown)
         el.addComponent(onClickDown)
+        engine.removeSystem(new LerpMove())
         engine.addSystem(new LerpMove())
       },
       {
@@ -71,6 +74,7 @@ export function spawnElevators() {
         if (el.hasComponent(OnPointerDown))
           el.removeComponent(OnPointerDown)
         el.addComponent(onClickUp)
+        engine.removeSystem(new LerpMove())
         engine.addSystem(new LerpMove())
       },
       {

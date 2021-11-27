@@ -5,7 +5,9 @@ export function initSound(path: string) {
     entity.addComponent(
         new AudioSource(new AudioClip(path))
     )
-    entity.getComponentOrCreate(Transform).position = new Vector3(8,0,8)
+    entity.getComponent(AudioSource).volume = 0.3
+
+    entity.setParent(Attachable.AVATAR)
     return entity
 }
 

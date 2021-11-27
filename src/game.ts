@@ -21,18 +21,47 @@ const pickupSound = initSound("sounds/pickedup.mp3")
 const eathenSound = initSound("sounds/eaten.mp3")
 const placedSound = initSound("sounds/placed.mp3")
 const resetSound = initSound("sounds/reset.mp3")
-const background = initSound("sounds/179_cyberpunk_city.mp3")
+const background = initSound("sounds/background.mp3")
 
 background.getComponent(AudioSource).loop = true
 background.getComponent(AudioSource).playing = true
 
-const pieceHeight = 0.3
 
-addBillboard()
+const pieceHeight = 0.1
+
+
+addBillboard(
+  "videos/bladerunner540.mp4", 
+  new Transform({
+    position: new Vector3(8, 3, 15.9),
+    scale: new Vector3(16, 7, 1),
+    rotation: Quaternion.Euler(0, 180, 0)
+  })
+)
+
+addBillboard(
+  "videos/bladerunner540.mp4", 
+  new Transform({
+    position: new Vector3(15.9, 3, 8),
+    scale: new Vector3(16, 7, 1),
+    rotation: Quaternion.Euler(0, 270, 0)
+  })
+)
+
+addBillboard(
+  "videos/bladerunner540.mp4", 
+  new Transform({
+    position: new Vector3(0.1, 3, 8),
+    scale: new Vector3(16, 7, 1),
+    rotation: Quaternion.Euler(0, 90, 0)
+  })
+)
 
 const board = spawnEntity(new GLTFShape("models/Doska.glb"), new Vector3(8, 0, 8)) 
 const pol = spawnEntity(new GLTFShape("models/Pol.glb"), new Vector3(8, 0, 8))
 const neonInt = spawnEntity(new GLTFShape("models/Neon_interior.glb"), new Vector3(8, 0, 9), new Quaternion(0, 180)) 
+const gambitBoard = spawnEntity(new GLTFShape("models/Tablica.glb"), new Vector3(0.5, 0, 8))
+gambitBoard.getComponent(Transform).rotate(new Vector3(0, 1, 0), 90)
 
 @Component("boardCellFlag")
 export class BoardCellFlag {
@@ -147,8 +176,7 @@ function enableInteractablePiece(interactable: boolean) {
 
         piece.getComponent(GLTFShape).isPointerBlocker = false  
         
-        // TODO: Make transparent as it block the view in 1st person view 
-
+        // TODO: Make transparent as it block the view in 1st person view
         currentInHand = piece
 
         sceneMessageBus.emit("pickupPiece", {currentInHand: currentInHand.uuid})
@@ -304,6 +332,7 @@ button.addComponent(new OnPointerDown((e)=>{
 }))
 
 function reset(){
+    resetSound.getComponent(AudioSource).playOnce()
     while (boxGroup.entities.length) {
       engine.removeEntity(boxGroup.entities[0])
     }

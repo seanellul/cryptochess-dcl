@@ -1,9 +1,7 @@
-export function addBillboard(): void {
+export function addBillboard(src: string, transform: Transform): void {
     // Video billboard
     // Make it smaller?
-    const myVideoClip = new VideoClip(
-        "videos/bladerunner540.mp4"
-    )
+    const myVideoClip = new VideoClip(src)
     const myVideoTexture = new VideoTexture(myVideoClip)
     const myMaterial = new Material()
     myMaterial.albedoColor = new Color3(1.5, 1.5, 1.5)
@@ -15,13 +13,7 @@ export function addBillboard(): void {
     let p = new PlaneShape()
     p.withCollisions = false
     screen.addComponent(p)
-    screen.addComponent(
-    new Transform({
-        position: new Vector3(8, 3, 15.9),
-        scale: new Vector3(16, 7, 1),
-        rotation: new Quaternion(0, 180, 0, 0)
-    })
-    )
+    screen.addComponent(transform)
     screen.addComponent(myMaterial)
     screen.addComponent(
     new OnPointerDown(() => {
