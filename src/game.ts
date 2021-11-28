@@ -338,8 +338,8 @@ engine.addSystem(new FloatMove())
 spawnElevators()
 
 // undo / redo
-const undoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(2.5, 0, 8.5),  Quaternion.Euler(0, 180, 0))
-const redoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(2.5, 0, 8))
+const redoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(2.5, 0, 8.5),  Quaternion.Euler(0, 180, 0))
+const undoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(2.5, 0, 8))
 const restartButton = spawnEntity(new GLTFShape("models/Button_restart.glb"), new Vector3(2.5, 0, 7))
 
 undoButton.addComponent(new OnPointerDown(() => {
