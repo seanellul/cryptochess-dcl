@@ -345,31 +345,39 @@ const restartButton = spawnEntity(new GLTFShape("models/Button_restart.glb"), ne
 undoButton.addComponent(new OnPointerDown(() => {
   // TODO: sort out multiplayer
   if (moveHistory.length) {
-    const last = moveHistory.pop()
-    revertMove(last.id, last.prevPos, last.newPos)
-    if (last.pieceTaken) {
-      revertTaken(last.pieceTaken, last.newPos)
-    }
-    redoHistory.push(last)
+    sceneMessageBus.emit("undoButton", {})
   }
 },
 {
   hoverText: "Undo move"
 }))
 
+sceneMessageBus.on("undoButton", () => {
+  const last = moveHistory.pop()
+  revertMove(last.id, last.prevPos, last.newPos)
+  if (last.pieceTaken) {
+    revertTaken(last.pieceTaken, last.newPos)
+  }
+  redoHistory.push(last)
+})
+
 redoButton.addComponent(new OnPointerDown(() => {
   if (redoHistory.length) {
-    const last = redoHistory.pop()
-    revertMove(last.id, last.newPos, last.prevPos, true)
-    if (last.pieceTaken) {
-      revertToOutside(last.pieceTaken)
-    }
-    moveHistory.push(last)
+    sceneMessageBus.emit("redoButton", {})
   }
 },
 {
   hoverText: "Redo move"
 }))
+
+sceneMessageBus.on("redoButton", () => {
+  const last = redoHistory.pop()
+  revertMove(last.id, last.newPos, last.prevPos, true)
+  if (last.pieceTaken) {
+    revertToOutside(last.pieceTaken)
+  }
+  moveHistory.push(last)
+})
 
 function revertMove(pieceId: string, revertToId: string, revertFromId: string, redo: boolean = false) {
   const piece = pieceGroup.entities.filter((piece) => {return piece.uuid == pieceId})[0]
