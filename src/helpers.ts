@@ -35,15 +35,6 @@ export const nextValidOutsideBlackCell = () => {
   return outsideCellsBlack[outBlackPos]
 }
 
-export const getCurrentOutsideWhiteCell = () => {
-  return outWhitePos > -1 ? outsideCellsWhite[outWhitePos] : outsideCellsWhite[0]
-}
-export const getCurrentOutsideBlackCell = () => {
-  return outBlackPos > -1 ? outsideCellsBlack[outBlackPos] : outsideCellsBlack[0]
-  return outsideCellsBlack[outBlackPos]
-}
-
-
 
 function initOutsideCells(offsetX: number, offsetZ: number) {
   let list = [] 

@@ -2,9 +2,7 @@ import {
   initSound, 
   spawnEntity, 
   nextValidOutsideWhiteCell, 
-  nextValidOutsideBlackCell,
-  getCurrentOutsideWhiteCell,
-  getCurrentOutsideBlackCell
+  nextValidOutsideBlackCell
  } from "helpers"
 import { whitePieces, blackPieces } from "pieces"
 import { addBillboard } from "billboard"
