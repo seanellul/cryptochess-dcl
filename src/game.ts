@@ -65,8 +65,8 @@ addBillboard(
 const board = spawnEntity(new GLTFShape("models/Numbered_board.glb"), new Vector3(8, 0, 8)) 
 const pol = spawnEntity(new GLTFShape("models/Ground.glb"), new Vector3(8, 0, 8))
 const neonInt = spawnEntity(new GLTFShape("models/Neon_interior.glb"), new Vector3(8, 0, 9), new Quaternion(0, 180)) 
-const gambitBoard = spawnEntity(new GLTFShape("models/Tablica.glb"), new Vector3(0.8, 0, 8))
-gambitBoard.getComponent(Transform).rotate(new Vector3(0, 1, 0), 90)
+// const gambitBoard = spawnEntity(new GLTFShape("models/Tablica.glb"), new Vector3(0.8, 0, 8))
+// gambitBoard.getComponent(Transform).rotate(new Vector3(0, 1, 0), 90)
 const cornerPillar = spawnEntity(new GLTFShape("models/stolb.glb"), new Vector3(15.35, 0, 15.35))
 const wall_left = spawnEntity(new GLTFShape("models/Wall_on_left_side.glb"), new Vector3(0.25, 0, 8), Quaternion.Euler(0, 90, 0))
 
@@ -347,6 +347,7 @@ const undoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), ne
 const restartButton = spawnEntity(new GLTFShape("models/Button_restart.glb"), new Vector3(2.5, 0, 7))
 
 undoButton.addComponent(new OnPointerDown(() => {
+  resetSound.getComponent(AudioSource).playOnce()
   if (moveHistory.length) {
     sceneMessageBus.emit("undoButton", {})
   }
@@ -374,6 +375,7 @@ redoButton.addComponent(new OnPointerDown(() => {
 }))
 
 sceneMessageBus.on("redoButton", () => {
+  resetSound.getComponent(AudioSource).playOnce()
   const last = redoHistory.pop()
   revertMove(last.id, last.newPos, last.prevPos, true)
   if (last.pieceTaken) {
