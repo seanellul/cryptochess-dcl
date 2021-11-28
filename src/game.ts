@@ -70,7 +70,7 @@ const neonInt = spawnEntity(new GLTFShape("models/Neon_interior.glb"), new Vecto
 const cornerPillar = spawnEntity(new GLTFShape("models/stolb.glb"), new Vector3(15.35, 0, 15.35))
 const wall_left = spawnEntity(new GLTFShape("models/Wall_on_left_side.glb"), new Vector3(0.25, 0, 8), Quaternion.Euler(0, 90, 0))
 
-
+const robot = spawnEntity(new GLTFShape("models/Robot_final.glb"), new Vector3(3, 0, 2), Quaternion.Euler(0, 180, 0))
 
 @Component("boardCellFlag")
 export class BoardCellFlag {
@@ -347,7 +347,6 @@ const undoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), ne
 const restartButton = spawnEntity(new GLTFShape("models/Button_restart.glb"), new Vector3(2.5, 0, 7))
 
 undoButton.addComponent(new OnPointerDown(() => {
-  resetSound.getComponent(AudioSource).playOnce()
   if (moveHistory.length) {
     sceneMessageBus.emit("undoButton", {})
   }
@@ -357,6 +356,7 @@ undoButton.addComponent(new OnPointerDown(() => {
 }))
 
 sceneMessageBus.on("undoButton", () => {
+  resetSound.getComponent(AudioSource).playOnce()
   const last = moveHistory.pop()
   revertMove(last.id, last.prevPos, last.newPos)
   if (last.pieceTaken) {
