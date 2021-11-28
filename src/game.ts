@@ -49,7 +49,7 @@ addBillboard(
   new Transform({
     position: new Vector3(15.9, 3, 8),
     scale: new Vector3(16, 7, 1),
-    rotation: Quaternion.Euler(0, 90, 0)
+    rotation: Quaternion.Euler(0, 270, 0)
   })
 )
 
