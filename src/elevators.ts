@@ -1,5 +1,4 @@
 import { spawnEntity } from "helpers"
-import { sceneMessageBus } from "messageBus"
 // Elevator logic
 
 @Component("lerpData")
@@ -37,8 +36,11 @@ const bnbOrigin = new Vector3(8, 0, 14)
 export class IsElevator {}
 
 function initElevator(origin: Vector3, side: string) {
-  const elevator = spawnEntity(new BoxShape(), origin)
-  elevator.getComponent(Transform).scale = new Vector3(2, 0.1, 3)
+  const elevator = spawnEntity(new GLTFShape("models/Elevator.glb"), origin)
+  if (side == "eth") {
+    elevator.getComponent(Transform).rotate(new Vector3(0, 1, 0), 180)
+  }
+  // elevator.getComponent(Transform).scale = new Vector3(2, 0.1, 3)
   elevator.addComponent(new IsElevator())
   return elevator
 }
