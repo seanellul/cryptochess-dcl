@@ -16,6 +16,11 @@ let currentInHand: any = null
 let prevPos: IEntity | null = null
 let turn: string = WHITE
 
+let moveCounter: number = 0
+const moveHistory: any[] = []
+const redoHistory: any[] = []
+
+
 // sounds
 const pickupSound = initSound("sounds/pickedup.mp3")
 const eathenSound = initSound("sounds/eaten.mp3")
@@ -60,8 +65,8 @@ addBillboard(
 const board = spawnEntity(new GLTFShape("models/Numbered_board.glb"), new Vector3(8, 0, 8)) 
 const pol = spawnEntity(new GLTFShape("models/Ground.glb"), new Vector3(8, 0, 8))
 const neonInt = spawnEntity(new GLTFShape("models/Neon_interior.glb"), new Vector3(8, 0, 9), new Quaternion(0, 180)) 
-const gambitBoard = spawnEntity(new GLTFShape("models/Tablica.glb"), new Vector3(0.5, 0, 8))
-gambitBoard.getComponent(Transform).rotate(new Vector3(0, 1, 0), 90)
+// const gambitBoard = spawnEntity(new GLTFShape("models/Tablica.glb"), new Vector3(0.5, 0, 8))
+// gambitBoard.getComponent(Transform).rotate(new Vector3(0, 1, 0), 90)
 
 
 @Component("boardCellFlag")
@@ -89,6 +94,7 @@ function makeChessBoard() {
 const boxGroup = engine.getComponentGroup(BoardCellFlag)
 
 function placePiece(box: IEntity) {
+  log("--- MoveCounter", moveCounter)
   let boxPosition = box.getComponent(Transform).position
 
   if (currentInHand) {
@@ -100,6 +106,13 @@ function placePiece(box: IEntity) {
     // place back to the same cell and don't loose a turn
     if (prevPos != box) {
       turn = currentInHand.getComponent(PieceFlag).color == WHITE ? BLACK : WHITE
+      moveHistory[moveCounter] = {
+        id: currentInHand.uuid,
+        prevPos: prevPos?.uuid,
+        newPos: box.uuid
+      }
+      log("placePiece", currentInHand.uuid)
+      moveCounter++
     }
     prevPos = null
 
@@ -124,7 +137,7 @@ function enableInteractableBox(interactable: boolean) {
         
         sceneMessageBus.emit('placePiece', {puuid: prevPos!.uuid, buuid: box.uuid, currentInHand: currentInHand?.uuid})
     
-        placePiece(box)
+        // placePiece(box)
       },
       {
         hoverText: "Place the piece"
@@ -323,9 +336,23 @@ engine.addSystem(new FloatMove())
 spawnElevators()
 
 // undo / redo
-const undoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(2.5, 0, 8.5),  Quaternion.Euler(0, 180, 0))
-const redoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(2.5, 0, 8))
+// const undoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(2.5, 0, 8.5),  Quaternion.Euler(0, 180, 0))
+// const redoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(2.5, 0, 8))
 const restartButton = spawnEntity(new GLTFShape("models/Button_restart.glb"), new Vector3(2.5, 0, 7))
+
+// undoButton.addComponent(new OnPointerDown(() => {
+//   // move counter
+//   // history array uuid, prev pos, new pos, enemy taken
+//   if (moveHistory.length) {
+//     const last = moveHistory[moveHistory.length - 1]
+//     revertMove(last.id, last.prevPos, last.newPos)
+//   }
+// }))
+
+// function revertMove(pieceId: string, prevId: string, newId: string) {
+//   log(pieceId, prevId, newId)
+//   const piece = pieceGroup.entities.filter((piece) => {return piece.uuid == pieceId})[0]
+// }
 
 // Reset game
 restartButton.addComponent(new OnPointerDown((e)=>{
