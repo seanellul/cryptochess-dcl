@@ -51,7 +51,7 @@ addBillboard(
   new Transform({
     position: new Vector3(15.9, 3, 8),
     scale: new Vector3(16, 7, 1),
-    rotation: Quaternion.Euler(0, 270, 0)
+    rotation: Quaternion.Euler(0, 90, 0)
   })
 )
 
@@ -420,9 +420,8 @@ function revertTaken(pieceId: string, revertToId: string) {
 }
 function revertToOutside(pieceId: string) {
   const piece = pieceGroup.entities.filter((piece) => {return piece.uuid == pieceId})[0]
-  log(getCurrentOutsideWhiteCell(), getCurrentOutsideBlackCell())
   piece.getComponent(Transform).position = piece.getComponent(PieceFlag).color == WHITE ? getCurrentOutsideWhiteCell() : getCurrentOutsideBlackCell() 
-  // piece.getComponent(PieceFlag).active = false
+  piece.getComponent(PieceFlag).active = false
 }
 
 // Reset game

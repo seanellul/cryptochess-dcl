@@ -1,6 +1,6 @@
 class WhitePiece {
     public King = {number: 1, name: "King", model: new GLTFShape("models/Etherium_King.glb")}
-    public Pawn = {number: 2, name: "Pawn", model: new GLTFShape("models/Etherum.glb")}
+    public Pawn = {number: 2, name: "Pawn", model: new GLTFShape("models/Etherium_peshka.glb")}
     public Knight = {number: 3, name: "Knight", model: new GLTFShape("models/Etherium_Horse.glb")}
     public Bishop = {number: 4, name: "Bishop", model: new GLTFShape("models/Etherium_Slon.glb")}
     public Rook = {number: 5, name: "Rook", model: new GLTFShape("models/Etherium_Rook.glb")}
@@ -8,7 +8,7 @@ class WhitePiece {
 }
 class BlackPiece {
     public King = {number: 1, name: "King", model: new GLTFShape("models/Binance_King.glb")}
-    public Pawn = {number: 2, name: "Pawn", model: new GLTFShape("models/Binance.glb")}
+    public Pawn = {number: 2, name: "Pawn", model: new GLTFShape("models/Binance_peshka.glb")}
     public Knight = {number: 3, name: "Knight", model: new GLTFShape("models/Binance_Horse.glb")}
     public Bishop = {number: 4, name: "Bishop", model: new GLTFShape("models/Binance_Slon.glb")}
     public Rook = {number: 5, name: "Rook", model: new GLTFShape("models/Binance_Rook.glb")}
