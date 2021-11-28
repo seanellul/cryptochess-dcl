@@ -22,18 +22,28 @@ export function spawnEntity(shape: Shape, position: Vector3, rotation?: Quaterni
 }
 
 
-let outWhitePos = -1
+let outWhitePos: number = -1
 export const nextValidOutsideWhiteCell = () => {
   if (outWhitePos < outsideCellsWhite.length - 1)
     outWhitePos++
   return outsideCellsWhite[outWhitePos]
 }
-let outBlackPos = -1
+let outBlackPos: number = -1
 export const nextValidOutsideBlackCell = () => {
   if (outBlackPos < outsideCellsBlack.length - 1)
     outBlackPos++
   return outsideCellsBlack[outBlackPos]
 }
+
+export const getCurrentOutsideWhiteCell = () => {
+  return outWhitePos > -1 ? outsideCellsWhite[outWhitePos] : outsideCellsWhite[0]
+}
+export const getCurrentOutsideBlackCell = () => {
+  return outBlackPos > -1 ? outsideCellsBlack[outBlackPos] : outsideCellsBlack[0]
+  return outsideCellsBlack[outBlackPos]
+}
+
+
 
 function initOutsideCells(offsetX: number, offsetZ: number) {
   let list = [] 

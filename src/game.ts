@@ -2,7 +2,9 @@ import {
   initSound, 
   spawnEntity, 
   nextValidOutsideWhiteCell, 
-  nextValidOutsideBlackCell
+  nextValidOutsideBlackCell,
+  getCurrentOutsideWhiteCell,
+  getCurrentOutsideBlackCell
  } from "helpers"
 import { whitePieces, blackPieces } from "pieces"
 import { addBillboard } from "billboard"
@@ -17,8 +19,8 @@ let prevPos: IEntity | null = null
 let turn: string = WHITE
 
 let moveCounter: number = 0
-const moveHistory: any[] = []
-const redoHistory: any[] = []
+let moveHistory: any[] = []
+let redoHistory: any[] = []
 
 
 // sounds
@@ -45,7 +47,7 @@ addBillboard(
 )
 
 addBillboard(
-  "videos/bladerunner4.mp4", 
+  "videos/bladerunner5.mp4", 
   new Transform({
     position: new Vector3(15.9, 3, 8),
     scale: new Vector3(16, 7, 1),
@@ -94,7 +96,6 @@ function makeChessBoard() {
 const boxGroup = engine.getComponentGroup(BoardCellFlag)
 
 function placePiece(box: IEntity) {
-  log("--- MoveCounter", moveCounter)
   let boxPosition = box.getComponent(Transform).position
 
   if (currentInHand) {
@@ -106,12 +107,13 @@ function placePiece(box: IEntity) {
     // place back to the same cell and don't loose a turn
     if (prevPos != box) {
       turn = currentInHand.getComponent(PieceFlag).color == WHITE ? BLACK : WHITE
+      redoHistory = []
       moveHistory[moveCounter] = {
         id: currentInHand.uuid,
         prevPos: prevPos?.uuid,
-        newPos: box.uuid
+        newPos: box.uuid,
+        pieceTaken: box.getComponent(BoardCellFlag).piece ? box.getComponent(BoardCellFlag).piece?.uuid : null
       }
-      log("placePiece", currentInHand.uuid)
       moveCounter++
     }
     prevPos = null
@@ -336,23 +338,84 @@ engine.addSystem(new FloatMove())
 spawnElevators()
 
 // undo / redo
-// const undoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(2.5, 0, 8.5),  Quaternion.Euler(0, 180, 0))
-// const redoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(2.5, 0, 8))
+const undoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(2.5, 0, 8.5),  Quaternion.Euler(0, 180, 0))
+const redoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(2.5, 0, 8))
 const restartButton = spawnEntity(new GLTFShape("models/Button_restart.glb"), new Vector3(2.5, 0, 7))
 
-// undoButton.addComponent(new OnPointerDown(() => {
-//   // move counter
-//   // history array uuid, prev pos, new pos, enemy taken
-//   if (moveHistory.length) {
-//     const last = moveHistory[moveHistory.length - 1]
-//     revertMove(last.id, last.prevPos, last.newPos)
-//   }
-// }))
+undoButton.addComponent(new OnPointerDown(() => {
+  // TODO: sort out multiplayer
+  if (moveHistory.length) {
+    const last = moveHistory.pop()
+    revertMove(last.id, last.prevPos, last.newPos)
+    if (last.pieceTaken) {
+      revertTaken(last.pieceTaken, last.newPos)
+    }
+    redoHistory.push(last)
+  }
+},
+{
+  hoverText: "Undo move"
+}))
 
-// function revertMove(pieceId: string, prevId: string, newId: string) {
-//   log(pieceId, prevId, newId)
-//   const piece = pieceGroup.entities.filter((piece) => {return piece.uuid == pieceId})[0]
-// }
+redoButton.addComponent(new OnPointerDown(() => {
+  if (redoHistory.length) {
+    const last = redoHistory.pop()
+    revertMove(last.id, last.newPos, last.prevPos, true)
+    if (last.pieceTaken) {
+      revertToOutside(last.pieceTaken)
+    }
+    moveHistory.push(last)
+  }
+},
+{
+  hoverText: "Redo move"
+}))
+
+function revertMove(pieceId: string, revertToId: string, revertFromId: string, redo: boolean = false) {
+  const piece = pieceGroup.entities.filter((piece) => {return piece.uuid == pieceId})[0]
+  // move made from
+  const revertTo = boxGroup.entities.filter((box) => {return box.uuid == revertToId})[0]
+  // move made to
+  const revertFrom = boxGroup.entities.filter((box) => {return box.uuid == revertFromId})[0]
+  // so to revert move to the opposite direction 
+
+  // manualy update piece position, box vacation, turn
+  const p = revertTo.getComponent(Transform).position
+  piece.getComponent(Transform).position = new Vector3(p.x, pieceHeight, p.z)
+  revertTo.getComponent(BoardCellFlag).piece = piece
+  revertTo.getComponent(BoardCellFlag).vacant = false
+  revertFrom.getComponent(BoardCellFlag).piece = null
+  revertFrom.getComponent(BoardCellFlag).vacant = true
+
+  if (redo) {
+    turn = piece.getComponent(PieceFlag).color == WHITE ? BLACK : WHITE
+  } else {
+    turn = piece.getComponent(PieceFlag).color
+  }
+
+  enableInteractablePiece(false);
+  enableInteractablePiece(true);
+
+}
+
+function revertTaken(pieceId: string, revertToId: string) {
+  const piece = pieceGroup.entities.filter((piece) => {return piece.uuid == pieceId})[0]
+  const revertTo = boxGroup.entities.filter((box) => {return box.uuid == revertToId})[0]
+
+  const p = revertTo.getComponent(Transform).position
+  piece.getComponent(Transform).position = new Vector3(p.x, pieceHeight, p.z)
+  piece.getComponent(PieceFlag).active = true
+
+  revertTo.getComponent(BoardCellFlag).piece = piece
+  revertTo.getComponent(BoardCellFlag).vacant = false
+
+}
+function revertToOutside(pieceId: string) {
+  const piece = pieceGroup.entities.filter((piece) => {return piece.uuid == pieceId})[0]
+  log(getCurrentOutsideWhiteCell(), getCurrentOutsideBlackCell())
+  piece.getComponent(Transform).position = piece.getComponent(PieceFlag).color == WHITE ? getCurrentOutsideWhiteCell() : getCurrentOutsideBlackCell() 
+  // piece.getComponent(PieceFlag).active = false
+}
 
 // Reset game
 restartButton.addComponent(new OnPointerDown((e)=>{
@@ -362,13 +425,16 @@ restartButton.addComponent(new OnPointerDown((e)=>{
 }))
 
 function reset(){
-    resetSound.getComponent(AudioSource).playOnce()
-    while (boxGroup.entities.length) {
-      engine.removeEntity(boxGroup.entities[0])
-    }
-    while (pieceGroup.entities.length) {
-      engine.removeEntity(pieceGroup.entities[0])
-    }
+  resetSound.getComponent(AudioSource).playOnce()
+  while (boxGroup.entities.length) {
+    engine.removeEntity(boxGroup.entities[0])
+  }
+  while (pieceGroup.entities.length) {
+    engine.removeEntity(pieceGroup.entities[0])
+  }
+
+  moveHistory = []
+  redoHistory = []
 
   initBoard()  
 }
