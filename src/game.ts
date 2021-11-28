@@ -343,7 +343,6 @@ const redoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), ne
 const restartButton = spawnEntity(new GLTFShape("models/Button_restart.glb"), new Vector3(2.5, 0, 7))
 
 undoButton.addComponent(new OnPointerDown(() => {
-  // TODO: sort out multiplayer
   if (moveHistory.length) {
     sceneMessageBus.emit("undoButton", {})
   }
