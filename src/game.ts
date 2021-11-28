@@ -69,6 +69,7 @@ const pol = spawnEntity(new GLTFShape("models/Ground.glb"), new Vector3(8, 0, 8)
 const neonInt = spawnEntity(new GLTFShape("models/Neon_interior.glb"), new Vector3(8, 0, 9), new Quaternion(0, 180)) 
 const gambitBoard = spawnEntity(new GLTFShape("models/Tablica.glb"), new Vector3(15.2, 0, 8), new Quaternion(0, 180))
 gambitBoard.getComponent(Transform).rotate(new Vector3(0, 1, 0), 90)
+const cornerPillar = spawnEntity(new GLTFShape("models/stolb.glb"), new Vector3(0.6, 0, 15.35))
 
 
 @Component("boardCellFlag")
