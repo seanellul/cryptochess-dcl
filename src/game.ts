@@ -67,8 +67,8 @@ addBillboard(
 const board = spawnEntity(new GLTFShape("models/Numbered_board.glb"), new Vector3(8, 0, 8)) 
 const pol = spawnEntity(new GLTFShape("models/Ground.glb"), new Vector3(8, 0, 8))
 const neonInt = spawnEntity(new GLTFShape("models/Neon_interior.glb"), new Vector3(8, 0, 9), new Quaternion(0, 180)) 
-// const gambitBoard = spawnEntity(new GLTFShape("models/Tablica.glb"), new Vector3(0.5, 0, 8))
-// gambitBoard.getComponent(Transform).rotate(new Vector3(0, 1, 0), 90)
+const gambitBoard = spawnEntity(new GLTFShape("models/Tablica.glb"), new Vector3(15.2, 0, 8), new Quaternion(0, 180))
+gambitBoard.getComponent(Transform).rotate(new Vector3(0, 1, 0), 90)
 
 
 @Component("boardCellFlag")
@@ -165,11 +165,13 @@ export class PieceFlag {
   name: string
   number: number
   active: boolean
-  constructor(color: string, name: string, number: number, active: boolean = true) {
+  ousideCell: null | Vector3
+  constructor(color: string, name: string, number: number, active: boolean = true, outsideCell: null|Vector3 = null ) {
     this.color = color
     this.name = name
     this.number = number
     this.active = active
+    this.ousideCell = outsideCell
   }
 }
 
@@ -273,12 +275,13 @@ sceneMessageBus.on('takePiece', (info) => {
   const piece = pieceGroup.entities.filter((piece) => {return piece.uuid == info.pieceId})[0]
 
   if (piece.getComponent(PieceFlag).color == WHITE) {
-    piece.getComponent(Transform).position = nextValidOutsideWhiteCell()
+    piece.getComponent(Transform).position = piece.getComponent(PieceFlag).ousideCell ? piece.getComponent(PieceFlag).ousideCell! : nextValidOutsideWhiteCell()
   } else {
-    piece.getComponent(Transform).position = nextValidOutsideBlackCell()
+    piece.getComponent(Transform).position = piece.getComponent(PieceFlag).ousideCell ? piece.getComponent(PieceFlag).ousideCell! : nextValidOutsideBlackCell()
   }
   // disable piece
   piece.getComponent(PieceFlag).active = false
+  piece.getComponent(PieceFlag).ousideCell = piece.getComponent(Transform).position
 
   placePiece(newBox)
 })
@@ -338,9 +341,9 @@ engine.addSystem(new FloatMove())
 spawnElevators()
 
 // undo / redo
-const redoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(2.5, 0, 8.5),  Quaternion.Euler(0, 180, 0))
-const undoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(2.5, 0, 8))
-const restartButton = spawnEntity(new GLTFShape("models/Button_restart.glb"), new Vector3(2.5, 0, 7))
+const undoButton= spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(13.5, 0, 7.5), Quaternion.Euler(0, 180, 0))
+const redoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(13.5, 0, 7))
+const restartButton = spawnEntity(new GLTFShape("models/Button_restart.glb"), new Vector3(13.5, 0, 8.5), Quaternion.Euler(0, 180, 0))
 
 undoButton.addComponent(new OnPointerDown(() => {
   if (moveHistory.length) {
@@ -419,7 +422,7 @@ function revertTaken(pieceId: string, revertToId: string) {
 }
 function revertToOutside(pieceId: string) {
   const piece = pieceGroup.entities.filter((piece) => {return piece.uuid == pieceId})[0]
-  piece.getComponent(Transform).position = piece.getComponent(PieceFlag).color == WHITE ? getCurrentOutsideWhiteCell() : getCurrentOutsideBlackCell() 
+  piece.getComponent(Transform).position = piece.getComponent(PieceFlag).ousideCell!
   piece.getComponent(PieceFlag).active = false
 }
 
