@@ -38,8 +38,8 @@ const pieceHeight = 0.1
 addBillboard(
   "videos/bladerunner540.mp4", 
   new Transform({
-    position: new Vector3(8, 3, 15.9),
-    scale: new Vector3(16, 7, 1),
+    position: new Vector3(8.07, 3, 15.9),
+    scale: new Vector3(15.67, 7, 1),
     rotation: Quaternion.Euler(0, 180, 0)
   })
 )
@@ -48,7 +48,7 @@ addBillboard(
   "videos/bladerunner3.mp4", 
   new Transform({
     position: new Vector3(15.9, 3, 8),
-    scale: new Vector3(16, 7, 1),
+    scale: new Vector3(15.8, 7, 1),
     rotation: Quaternion.Euler(0, 270, 0)
   })
 )
@@ -65,8 +65,8 @@ addBillboard(
 const board = spawnEntity(new GLTFShape("models/Numbered_board.glb"), new Vector3(8, 0, 8)) 
 const pol = spawnEntity(new GLTFShape("models/Ground.glb"), new Vector3(8, 0, 8))
 const neonInt = spawnEntity(new GLTFShape("models/Neon_interior.glb"), new Vector3(8, 0, 9), new Quaternion(0, 180)) 
-// const gambitBoard = spawnEntity(new GLTFShape("models/Tablica.glb"), new Vector3(0.8, 0, 8))
-// gambitBoard.getComponent(Transform).rotate(new Vector3(0, 1, 0), 90)
+const gambitBoard = spawnEntity(new GLTFShape("models/Tablica.glb"), new Vector3(0.8, 0, 8))
+gambitBoard.getComponent(Transform).rotate(new Vector3(0, 1, 0), 90)
 const cornerPillar = spawnEntity(new GLTFShape("models/stolb.glb"), new Vector3(15.35, 0, 15.35))
 const wall_left = spawnEntity(new GLTFShape("models/Wall_on_left_side.glb"), new Vector3(0.25, 0, 8), Quaternion.Euler(0, 90, 0))
 

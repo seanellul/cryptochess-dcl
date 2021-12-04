@@ -20,14 +20,14 @@ export class LerpMove implements ISystem {
         let lerp = el.getComponent(LerpData)
         if (lerp.fraction < 1) {
           transform.position = Vector3.Lerp(lerp.origin, lerp.target, lerp.fraction)
-          lerp.fraction += dt / 6
-        } else {
-          engine.removeSystem(new LerpMove())
+          lerp.fraction += dt / 1
         }
       }
     }
   }
 }
+
+const LerpMoveSystem = new LerpMove() 
 
 const ethOrigin = new Vector3(8, 0, 2)
 const bnbOrigin = new Vector3(8, 0, 14)
@@ -40,7 +40,6 @@ function initElevator(origin: Vector3, side: string) {
   if (side == "eth") {
     elevator.getComponent(Transform).rotate(new Vector3(0, 1, 0), 180)
   }
-  // elevator.getComponent(Transform).scale = new Vector3(2, 0.1, 3)
   elevator.addComponent(new IsElevator())
   return elevator
 }
@@ -64,8 +63,8 @@ export function spawnElevators() {
         if (el.hasComponent(OnPointerDown))
           el.removeComponent(OnPointerDown)
         el.addComponent(onClickDown)
-        engine.removeSystem(new LerpMove())
-        engine.addSystem(new LerpMove())
+        engine.removeSystem(LerpMoveSystem)
+        engine.addSystem(LerpMoveSystem)
       },
       {
         hoverText: "Press to go UP",
@@ -76,8 +75,8 @@ export function spawnElevators() {
         if (el.hasComponent(OnPointerDown))
           el.removeComponent(OnPointerDown)
         el.addComponent(onClickUp)
-        engine.removeSystem(new LerpMove())
-        engine.addSystem(new LerpMove())
+        engine.removeSystem(LerpMoveSystem)
+        engine.addSystem(LerpMoveSystem)
       },
       {
         hoverText: "Press to go DOWN",
