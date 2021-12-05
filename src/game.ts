@@ -107,6 +107,9 @@ function placePiece(box: IEntity) {
 
     // place back to the same cell and don't loose a turn
     if (prevPos != box) {
+      // how to handle move undo? 
+      currentInHand.getComponent(PieceFlag).prevMoved = currentInHand.getComponent(PieceFlag).moved
+      currentInHand.getComponent(PieceFlag).moved = true
       turn = currentInHand.getComponent(PieceFlag).color == WHITE ? BLACK : WHITE
       redoHistory = []
       moveHistory[moveCounter] = {
@@ -167,12 +170,24 @@ export class PieceFlag {
   number: number
   active: boolean
   ousideCell: null | Vector3
-  constructor(color: string, name: string, number: number, active: boolean = true, outsideCell: null|Vector3 = null ) {
+  moved: boolean
+  prevMoved: boolean
+  constructor(
+    color: string, 
+    name: string, 
+    number: number, 
+    active: boolean = true, 
+    outsideCell: null|Vector3 = null, 
+    moved: boolean = false,
+    prevMoved: boolean = false
+  ) {
     this.color = color
     this.name = name
     this.number = number
     this.active = active
     this.ousideCell = outsideCell
+    this.moved = moved
+    this.prevMoved = prevMoved
   }
 }
 
