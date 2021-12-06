@@ -1,3 +1,4 @@
+import * as utils from '@dcl/ecs-scene-utils'
 import { 
   initSound, 
   spawnEntity, 
@@ -8,6 +9,7 @@ import { whitePieces, blackPieces } from "pieces"
 import { addBillboard } from "billboard"
 import { spawnElevators } from "elevators"
 import { sceneMessageBus } from "messageBus"
+import { ScaleDownData, scaleSystemInit, ScaleUpData } from "scaleUpDown"
 
 const WHITE = "white"
 const BLACK = "black"
@@ -33,6 +35,8 @@ background.getComponent(AudioSource).playing = true
 
 
 const pieceHeight = 0.1
+const defaultScale = new Vector3(1, 1, 1)
+scaleSystemInit()
 
 
 addBillboard(
@@ -62,15 +66,15 @@ addBillboard(
 //   })
 // )
 
-const board = spawnEntity(new GLTFShape("models/Numbered_board.glb"), new Vector3(8, 0, 8)) 
-const pol = spawnEntity(new GLTFShape("models/Ground.glb"), new Vector3(8, 0, 8))
-const neonInt = spawnEntity(new GLTFShape("models/Neon_interior.glb"), new Vector3(8, 0, 9), new Quaternion(0, 180)) 
-const gambitBoard = spawnEntity(new GLTFShape("models/Tablica.glb"), new Vector3(0.8, 0, 8))
+const board = spawnEntity(new GLTFShape("models/Numbered_board.glb"), new Vector3(8, 0, 8), defaultScale) 
+const pol = spawnEntity(new GLTFShape("models/Ground.glb"), new Vector3(8, 0, 8), defaultScale)
+const neonInt = spawnEntity(new GLTFShape("models/Neon_interior.glb"), new Vector3(7.9, 0, 9), defaultScale, new Quaternion(0, 180)) 
+const gambitBoard = spawnEntity(new GLTFShape("models/Tablica.glb"), new Vector3(0.8, 0, 8), defaultScale)
 gambitBoard.getComponent(Transform).rotate(new Vector3(0, 1, 0), 90)
-const cornerPillar = spawnEntity(new GLTFShape("models/stolb.glb"), new Vector3(15.35, 0, 15.35))
-const wall_left = spawnEntity(new GLTFShape("models/Wall_on_left_side.glb"), new Vector3(0.25, 0, 8), Quaternion.Euler(0, 90, 0))
+const cornerPillar = spawnEntity(new GLTFShape("models/stolb.glb"), new Vector3(15.35, 0, 15.35), defaultScale)
+const wall_left = spawnEntity(new GLTFShape("models/Wall_on_left_side.glb"), new Vector3(0.25, 0, 8), defaultScale, Quaternion.Euler(0, 90, 0))
 
-const robot = spawnEntity(new GLTFShape("models/Robot_final.glb"), new Vector3(3, 0, 2), Quaternion.Euler(0, 180, 0))
+const robot = spawnEntity(new GLTFShape("models/Robot_final.glb"), new Vector3(3, 0, 2), defaultScale, Quaternion.Euler(0, 180, 0))
 
 @Component("boardCellFlag")
 export class BoardCellFlag {
@@ -87,7 +91,7 @@ function makeChessBoard() {
   for(let row = 1; row < 9; row++) {
     for(let col = 1; col < 9; col++) {
       const tileModel = ((row + col) % 2 == 1) ? new GLTFShape("models/Binance_plane.glb") : new GLTFShape("models/Etherium_plane.glb")
-      let box = spawnEntity(tileModel, new Vector3(offset + col, 0.21, offset + row))
+      let box = spawnEntity(tileModel, new Vector3(offset + col, 0.21, offset + row), defaultScale)
       box.getComponent(Transform).rotate(new Vector3(0,1,0), 180)
       box.addComponent(new BoardCellFlag())
     }
@@ -290,6 +294,8 @@ sceneMessageBus.on('takePiece', (info) => {
   const newBox = boxGroup.entities.filter((box) => {return box.uuid == info.boxId})[0]
   const piece = pieceGroup.entities.filter((piece) => {return piece.uuid == info.pieceId})[0]
 
+  // piece.addComponent(new ScaleDownData())
+
   if (piece.getComponent(PieceFlag).color == WHITE) {
     piece.getComponent(Transform).position = piece.getComponent(PieceFlag).ousideCell ? piece.getComponent(PieceFlag).ousideCell! : nextValidOutsideWhiteCell()
   } else {
@@ -312,7 +318,7 @@ function addPieces() {
       let x = box.getComponent(Transform).position.x
       let z = box.getComponent(Transform).position.z
 
-      let piece = null
+      let piece: null | IEntity = null
       box.getComponent(BoardCellFlag).vacant = false
       
       // might need to offset some figures
@@ -320,15 +326,19 @@ function addPieces() {
       
       if (i > 47) {
         let tempPiece = blackPieces[i - 48]
-        piece = spawnEntity(tempPiece.model, pos, new Quaternion(0, 180))
+        piece = spawnEntity(tempPiece.model, pos, new Vector3(0, 0, 0), new Quaternion(0, 180))
         piece.addComponent(new PieceFlag(BLACK, tempPiece.name, tempPiece.number))
         if (tempPiece.name == "Pawn") 
           piece.addComponent(new IsPawn())
       } else if (i < 16){
-        piece = spawnEntity(whitePieces[i].model, pos)
+        piece = spawnEntity(whitePieces[i].model, pos, new Vector3(0, 0, 0),)
         piece.addComponent(new PieceFlag(WHITE, whitePieces[i].name, whitePieces[i].number))
         if (whitePieces[i].name == "Pawn") 
           piece.addComponent(new IsPawn())
+      }
+
+      if (piece) {
+        piece!.addComponent(new ScaleUpData())
       }
 
       box.getComponent(BoardCellFlag).piece = piece
@@ -357,9 +367,9 @@ engine.addSystem(new FloatMove())
 spawnElevators()
 
 // undo / redo
-const redoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(2.5, 0, 8.5), Quaternion.Euler(0, 180, 0))
-const undoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(2.5, 0, 8))
-const restartButton = spawnEntity(new GLTFShape("models/Button_restart.glb"), new Vector3(2.5, 0, 7))
+const redoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(2.5, 0, 8.5), defaultScale, Quaternion.Euler(0, 180, 0))
+const undoButton = spawnEntity(new GLTFShape("models/Button_front-back.glb"), new Vector3(2.5, 0, 8), defaultScale)
+const restartButton = spawnEntity(new GLTFShape("models/Button_restart.glb"), new Vector3(2.5, 0, 7), defaultScale)
 
 undoButton.addComponent(new OnPointerDown(() => {
   if (moveHistory.length) {
@@ -474,6 +484,6 @@ function initBoard(): void {
     makeChessBoard();
     addPieces();
     enableInteractablePiece(true);
-}
+  }
 
 initBoard()

@@ -1,4 +1,5 @@
 import { spawnEntity } from "helpers"
+import * as utils from '@dcl/ecs-scene-utils'
 // Elevator logic
 
 @Component("lerpData")
@@ -36,7 +37,7 @@ const bnbOrigin = new Vector3(8, 0, 14)
 export class IsElevator {}
 
 function initElevator(origin: Vector3, side: string) {
-  const elevator = spawnEntity(new GLTFShape("models/Elevator.glb"), origin)
+  const elevator = spawnEntity(new GLTFShape("models/Elevator.glb"), origin, new Vector3(1, 1, 1))
   if (side == "eth") {
     elevator.getComponent(Transform).rotate(new Vector3(0, 1, 0), 180)
   }
@@ -84,6 +85,28 @@ export function spawnElevators() {
       })
       
       el.addComponent(onClickUp)
+
+      //  not implemented yet
+      const onCameraExit = new utils.TriggerComponent(
+        new utils.TriggerBoxShape(new Vector3(0, 3, 0), new Vector3(0, 3, 0)),
+        {
+          // onCameraEnter: () => {
+          //   coin.getComponent(Transform).scale.setAll(0)
+          //   pickupSound.getComponent(AudioSource).playOnce()
+          // },
+          onCameraExit: () => {
+            log("Camera Exit")
+            el.addComponentOrReplace(new LerpData(el.getComponent(Transform).position, posBottom, 0))
+            if (el.hasComponent(OnPointerDown))
+              el.removeComponent(OnPointerDown)
+            el.addComponent(onClickUp)
+            engine.removeSystem(LerpMoveSystem)
+            engine.addSystem(LerpMoveSystem)
+          }
+        }
+      )
+
+      // el.addComponent(onCameraExit)
     }
 
 }

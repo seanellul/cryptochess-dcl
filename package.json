@@ -12,5 +12,11 @@
   },
   "devDependencies": {
     "decentraland-ecs": "latest"
-  }
+  },
+  "dependencies": {
+    "@dcl/ecs-scene-utils": "^1.7.5"
+  },
+  "bundledDependencies": [
+    "@dcl/ecs-scene-utils"
+  ]
 }

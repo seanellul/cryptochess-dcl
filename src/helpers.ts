@@ -11,10 +11,10 @@ export function initSound(path: string) {
     return entity
 }
 
-export function spawnEntity(shape: Shape, position: Vector3, rotation?: Quaternion) {
+export function spawnEntity(shape: Shape, position: Vector3, scale: Vector3, rotation?: Quaternion) {
     const entity = new Entity()
     
-    entity.addComponent(new Transform({ position: position, rotation }))
+    entity.addComponent(new Transform({ position: position, scale: scale, rotation }))
     entity.addComponent(shape)
     engine.addEntity(entity)
     
