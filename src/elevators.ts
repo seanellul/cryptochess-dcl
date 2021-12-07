@@ -86,9 +86,8 @@ export function spawnElevators() {
       
       el.addComponent(onClickUp)
 
-      //  not implemented yet
       const onCameraExit = new utils.TriggerComponent(
-        new utils.TriggerBoxShape(new Vector3(0, 3, 0), new Vector3(0, 3, 0)),
+        new utils.TriggerBoxShape(new Vector3(2, 3, 4), new Vector3(0, 3, 0)),
         {
           // onCameraEnter: () => {
           //   coin.getComponent(Transform).scale.setAll(0)
@@ -106,7 +105,9 @@ export function spawnElevators() {
         }
       )
 
-      // el.addComponent(onCameraExit)
+      new utils.TriggerBoxShape
+
+      el.addComponent(onCameraExit)
     }
 
 }
