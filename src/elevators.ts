@@ -95,7 +95,8 @@ export function spawnElevators() {
         new utils.TriggerBoxShape(new Vector3(2, 3, 4), new Vector3(0, 3, 0)),
         {
           onCameraExit: () => {
-            elevatorSound.getComponent(AudioSource).playOnce()
+            if (Math.floor(el.getComponent(Transform).position.y) !== posBottom.y)
+              elevatorSound.getComponent(AudioSource).playOnce()
             el.addComponentOrReplace(new LerpData(el.getComponent(Transform).position, posBottom, 0))
             if (el.hasComponent(OnPointerDown))
               el.removeComponent(OnPointerDown)
