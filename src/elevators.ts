@@ -1,4 +1,4 @@
-import { spawnEntity } from "helpers"
+import { spawnEntity, initSound } from "helpers"
 import * as utils from '@dcl/ecs-scene-utils'
 // Elevator logic
 
@@ -33,6 +33,8 @@ const LerpMoveSystem = new LerpMove()
 const ethOrigin = new Vector3(8, 0, 2)
 const bnbOrigin = new Vector3(8, 0, 14)
 
+const elevatorSound = initSound("sounds/elevator.mp3")
+
 @Component("isElevator")
 export class IsElevator {}
 
@@ -60,6 +62,7 @@ export function spawnElevators() {
 
 
       const onClickUp = new OnPointerDown(() => {
+        elevatorSound.getComponent(AudioSource).playOnce()
         el.addComponentOrReplace(new LerpData(el.getComponent(Transform).position, posTop, 0))
         if (el.hasComponent(OnPointerDown))
           el.removeComponent(OnPointerDown)
@@ -72,6 +75,7 @@ export function spawnElevators() {
         distance: 6
       })
       const onClickDown = new OnPointerDown(() => {
+        elevatorSound.getComponent(AudioSource).playOnce()
         el.addComponentOrReplace(new LerpData(el.getComponent(Transform).position, posBottom, 0))
         if (el.hasComponent(OnPointerDown))
           el.removeComponent(OnPointerDown)
@@ -86,15 +90,12 @@ export function spawnElevators() {
       
       el.addComponent(onClickUp)
 
+      // trigger to go down if player jumped off
       const onCameraExit = new utils.TriggerComponent(
         new utils.TriggerBoxShape(new Vector3(2, 3, 4), new Vector3(0, 3, 0)),
         {
-          // onCameraEnter: () => {
-          //   coin.getComponent(Transform).scale.setAll(0)
-          //   pickupSound.getComponent(AudioSource).playOnce()
-          // },
           onCameraExit: () => {
-            log("Camera Exit")
+            elevatorSound.getComponent(AudioSource).playOnce()
             el.addComponentOrReplace(new LerpData(el.getComponent(Transform).position, posBottom, 0))
             if (el.hasComponent(OnPointerDown))
               el.removeComponent(OnPointerDown)

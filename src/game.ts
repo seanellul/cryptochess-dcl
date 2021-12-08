@@ -112,7 +112,6 @@ function placePiece(box: IEntity) {
     // place back to the same cell and don't loose a turn
     if (prevPos != box) {
       // how to handle move undo? 
-      currentInHand.getComponent(PieceFlag).prevMoved = currentInHand.getComponent(PieceFlag).moved
       currentInHand.getComponent(PieceFlag).moved = true
       turn = currentInHand.getComponent(PieceFlag).color == WHITE ? BLACK : WHITE
       redoHistory = []
@@ -120,7 +119,8 @@ function placePiece(box: IEntity) {
         id: currentInHand.uuid,
         prevPos: prevPos?.uuid,
         newPos: box.uuid,
-        pieceTaken: box.getComponent(BoardCellFlag).piece ? box.getComponent(BoardCellFlag).piece?.uuid : null
+        pieceTaken: box.getComponent(BoardCellFlag).piece ? box.getComponent(BoardCellFlag).piece?.uuid : null,   // we taken piece, so revert two moves
+        firstMove: currentInHand.getComponent(PieceFlag).moved ? false : true   // if it was moved for a first time revert moved to false
       }
       moveCounter++
     }
@@ -147,10 +147,10 @@ function enableInteractableBox(interactable: boolean) {
         
         sceneMessageBus.emit('placePiece', {puuid: prevPos!.uuid, buuid: box.uuid, currentInHand: currentInHand?.uuid})
     
-        // placePiece(box)
       },
       {
-        hoverText: "Place the piece"
+        hoverText: "Place the piece",
+        distance: 16
       })
 
     
@@ -175,23 +175,20 @@ export class PieceFlag {
   active: boolean
   ousideCell: null | Vector3
   moved: boolean
-  prevMoved: boolean
   constructor(
     color: string, 
     name: string, 
     number: number, 
     active: boolean = true, 
     outsideCell: null|Vector3 = null, 
-    moved: boolean = false,
-    prevMoved: boolean = false
-  ) {
+    moved: boolean = false
+) {
     this.color = color
     this.name = name
     this.number = number
     this.active = active
     this.ousideCell = outsideCell
     this.moved = moved
-    this.prevMoved = prevMoved
   }
 }
 
@@ -234,7 +231,8 @@ function enableInteractablePiece(interactable: boolean) {
         enableInteractableBox(true)
       },
       {
-        hoverText: "Pick the " + piece.getComponent(PieceFlag).name
+        hoverText: "Pick the " + piece.getComponent(PieceFlag).name,
+        distance: 16
       })
 
       piece.addComponent(pieceOnClick)
@@ -260,14 +258,14 @@ sceneMessageBus.on("pickupPiece", (info) => {
 
 })
 
-
+// and to castle the king
 function enableInteractableEnemy(interactable: boolean) {
   for (let piece of pieceGroup.entities) {
     if (
       interactable &&
       piece.getComponent(PieceFlag).color != turn &&
       piece.getComponent(PieceFlag).active == true
-      ) {
+    ) {
 
       let pieceOnClick = new OnPointerDown(() => {
         
@@ -279,10 +277,20 @@ function enableInteractableEnemy(interactable: boolean) {
         placePiece(box)
       },
       {
-        hoverText: "Take the enemy " + piece.getComponent(PieceFlag).name
+        hoverText: "Take the enemy " + piece.getComponent(PieceFlag).name,
+        distance: 16
       })     
 
       piece.addComponent(pieceOnClick)
+    } else if (  // for castle the king
+      interactable &&
+      piece.getComponent(PieceFlag).color == turn &&    // same color
+      piece.getComponent(PieceFlag).active == true
+      // check that this is king's turn (current in hand - king)
+    ) { 
+      // here on click event for castle the king for a rook only
+      // check is pieces on the way
+      // check that pieces wasn't moved before
     } else {
       if (piece.hasComponent(OnPointerDown)) 
         piece.removeComponent(OnPointerDown)
