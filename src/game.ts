@@ -74,7 +74,7 @@ gambitBoard.getComponent(Transform).rotate(new Vector3(0, 1, 0), 90)
 const cornerPillar = spawnEntity(new GLTFShape("models/stolb.glb"), new Vector3(15.35, 0, 15.35), defaultScale)
 const wall_left = spawnEntity(new GLTFShape("models/Wall_on_left_side.glb"), new Vector3(0.25, 0, 8), defaultScale, Quaternion.Euler(0, 90, 0))
 
-const robot = spawnEntity(new GLTFShape("models/Robot_final.glb"), new Vector3(3, 0, 2), defaultScale, Quaternion.Euler(0, 180, 0))
+const robot = spawnEntity(new GLTFShape("models/Robot_final.glb"), new Vector3(2.5, 0, 2), defaultScale, Quaternion.Euler(0, 180, 0))
 
 @Component("boardCellFlag")
 export class BoardCellFlag {
@@ -111,8 +111,7 @@ function placePiece(box: IEntity) {
 
     // place back to the same cell and don't loose a turn
     if (prevPos != box) {
-      // how to handle move undo? 
-      currentInHand.getComponent(PieceFlag).moved = true
+      // TODO: how to handle castling undo? 
       turn = currentInHand.getComponent(PieceFlag).color == WHITE ? BLACK : WHITE
       redoHistory = []
       moveHistory[moveCounter] = {
@@ -122,6 +121,7 @@ function placePiece(box: IEntity) {
         pieceTaken: box.getComponent(BoardCellFlag).piece ? box.getComponent(BoardCellFlag).piece?.uuid : null,   // we taken piece, so revert two moves
         firstMove: currentInHand.getComponent(PieceFlag).moved ? false : true   // if it was moved for a first time revert moved to false
       }
+      currentInHand.getComponent(PieceFlag).moved = true
       moveCounter++
     }
     prevPos = null
@@ -141,7 +141,6 @@ function enableInteractableBox(interactable: boolean) {
   
   for (let box of boxGroup.entities) {
     if (interactable && box.getComponent(BoardCellFlag).vacant) {
-      // TODO: set maximum click distance?
       let boxOnClick = new OnPointerDown(() => {
         placedSound.getComponent(AudioSource).playOnce()
         
@@ -211,7 +210,6 @@ function enableInteractablePiece(interactable: boolean) {
 
         piece.getComponent(GLTFShape).isPointerBlocker = false  
         
-        // TODO: Make transparent as it block the view in 1st person view
         currentInHand = piece
 
         sceneMessageBus.emit("pickupPiece", {currentInHand: currentInHand.uuid})
@@ -245,7 +243,6 @@ function enableInteractablePiece(interactable: boolean) {
 sceneMessageBus.on("pickupPiece", (info) => {
   enableInteractablePiece(false)
   currentInHand = pieceGroup.entities.filter((piece) => {return piece.uuid == info.currentInHand})[0]
-
   for (let box of boxGroup.entities) {
     if (box.getComponent(BoardCellFlag).piece) {
       if (box.getComponent(BoardCellFlag).piece! === currentInHand) {
@@ -285,17 +282,122 @@ function enableInteractableEnemy(interactable: boolean) {
     } else if (  // for castle the king
       interactable &&
       piece.getComponent(PieceFlag).color == turn &&    // same color
-      piece.getComponent(PieceFlag).active == true
-      // check that this is king's turn (current in hand - king)
+      piece.getComponent(PieceFlag).active == true &&
+      piece.getComponent(PieceFlag).name === "Rook" &&   // to make rooks interactable
+      !piece.getComponent(PieceFlag).moved &&    // Rook wasn't moved
+      currentInHand.getComponent(PieceFlag).name === "King" && // King in hand
+      !currentInHand.getComponent(PieceFlag).moved   // king wasn't moved
     ) { 
-      // here on click event for castle the king for a rook only
-      // check is pieces on the way
-      // check that pieces wasn't moved before
+      if (turn == WHITE) {   // if eth turn
+        if (   // if left rook
+          pieceGroup.entities.indexOf(piece) == 0 &&
+          boxGroup.entities[1].getComponent(BoardCellFlag).vacant == true &&
+          boxGroup.entities[2].getComponent(BoardCellFlag).vacant == true &&
+          boxGroup.entities[3].getComponent(BoardCellFlag).vacant == true 
+        ) {
+          const rookClick = new OnPointerDown(() => {
+            sceneMessageBus.emit("castleTheKing", {rookID: piece.uuid})
+          },
+          {
+            hoverText: "Castle the king",
+            distance: 16
+          })
+
+          piece.addComponent(rookClick)
+        } else if (   // if right rook
+          pieceGroup.entities.indexOf(piece) == 7 &&
+          boxGroup.entities[5].getComponent(BoardCellFlag).vacant == true &&
+          boxGroup.entities[6].getComponent(BoardCellFlag).vacant == true 
+        ) {
+          const rookClick = new OnPointerDown(() => {
+            sceneMessageBus.emit("castleTheKing", {rookID: piece.uuid})
+          },
+          {
+            hoverText: "Castle the king",
+            distance: 16
+          })
+          
+          piece.addComponent(rookClick)
+        }
+      } else {   // if bin turn 
+        if (   // if left rook
+          pieceGroup.entities.indexOf(piece) == 24 &&
+          boxGroup.entities[57].getComponent(BoardCellFlag).vacant == true &&
+          boxGroup.entities[58].getComponent(BoardCellFlag).vacant == true &&
+          boxGroup.entities[59].getComponent(BoardCellFlag).vacant == true 
+        ) {
+          const rookClick = new OnPointerDown(() => {
+            sceneMessageBus.emit("castleTheKing", {rookID: piece.uuid})
+          },
+          {
+            hoverText: "Castle the king",
+            distance: 16
+          })
+
+          piece.addComponent(rookClick)
+        } else if (   // if right rook
+          pieceGroup.entities.indexOf(piece) == 31 &&
+          boxGroup.entities[61].getComponent(BoardCellFlag).vacant == true &&
+          boxGroup.entities[62].getComponent(BoardCellFlag).vacant == true 
+        ) {
+          const rookClick = new OnPointerDown(() => {
+            sceneMessageBus.emit("castleTheKing", {rookID: piece.uuid})
+          },
+          {
+            hoverText: "Castle the king",
+            distance: 16
+          })
+          
+          piece.addComponent(rookClick)
+        }
+      }
     } else {
       if (piece.hasComponent(OnPointerDown)) 
         piece.removeComponent(OnPointerDown)
     }
   }
+}
+
+sceneMessageBus.on("castleTheKing", (info) => {
+  const rook = pieceGroup.entities.filter((p) => {return p.uuid === info.rookID})[0]
+  castleTheKing(rook)
+})
+
+function castleTheKing(rook:IEntity) {
+  switch(pieceGroup.entities.indexOf(rook)) {
+    case 0: {
+      castleMove(rook, 3, 0, 2)
+      break
+    }
+    case 7: {
+      castleMove(rook, 5, 7, 6)
+      break
+    }
+    case 24: {
+      castleMove(rook, 59, 56, 58)
+      break
+    }
+    case 31: {
+      castleMove(rook, 61, 63, 62)
+      break
+    }
+    default: {
+      log("Nothing to castle")
+      break
+    }
+  }
+}
+
+// TODO: add move to undo history
+function castleMove(rook: IEntity, newRookBoxIndex: number, oldRookBoxIndex: number, newKingBoxIndex: number) {
+  //  move rook
+  const b = boxGroup.entities[newRookBoxIndex].getComponent(Transform).position
+  rook.getComponent(Transform).position = new Vector3(b.x, pieceHeight, b.z)
+  rook.getComponent(PieceFlag).moved = false
+  boxGroup.entities[oldRookBoxIndex].getComponent(BoardCellFlag).vacant = true
+  boxGroup.entities[oldRookBoxIndex].getComponent(BoardCellFlag).piece = null
+  // move king
+  placePiece(boxGroup.entities[newKingBoxIndex])
 }
 
 sceneMessageBus.on('takePiece', (info) => {
@@ -391,7 +493,7 @@ undoButton.addComponent(new OnPointerDown(() => {
 sceneMessageBus.on("undoButton", () => {
   resetSound.getComponent(AudioSource).playOnce()
   const last = moveHistory.pop()
-  revertMove(last.id, last.prevPos, last.newPos)
+  revertMove(last.id, last.prevPos, last.newPos, last.firstMove)
   if (last.pieceTaken) {
     revertTaken(last.pieceTaken, last.newPos)
   }
@@ -410,14 +512,14 @@ redoButton.addComponent(new OnPointerDown(() => {
 sceneMessageBus.on("redoButton", () => {
   resetSound.getComponent(AudioSource).playOnce()
   const last = redoHistory.pop()
-  revertMove(last.id, last.newPos, last.prevPos, true)
+  revertMove(last.id, last.newPos, last.prevPos, last.firstMove, true)
   if (last.pieceTaken) {
     revertToOutside(last.pieceTaken)
   }
   moveHistory.push(last)
 })
 
-function revertMove(pieceId: string, revertToId: string, revertFromId: string, redo: boolean = false) {
+function revertMove(pieceId: string, revertToId: string, revertFromId: string, firstMove: boolean, redo: boolean = false) {
   const piece = pieceGroup.entities.filter((piece) => {return piece.uuid == pieceId})[0]
   // move made from
   const revertTo = boxGroup.entities.filter((box) => {return box.uuid == revertToId})[0]
@@ -435,8 +537,11 @@ function revertMove(pieceId: string, revertToId: string, revertFromId: string, r
 
   if (redo) {
     turn = piece.getComponent(PieceFlag).color == WHITE ? BLACK : WHITE
+    piece.getComponent(PieceFlag).moved = true
   } else {
     turn = piece.getComponent(PieceFlag).color
+    if (firstMove) 
+      piece.getComponent(PieceFlag).moved = false
   }
 
   enableInteractablePiece(false);
