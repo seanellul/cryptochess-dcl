@@ -100,7 +100,7 @@ function makeChessBoard() {
 
 const boxGroup = engine.getComponentGroup(BoardCellFlag)
 
-function placePiece(box: IEntity) {
+function placePiece(box: IEntity, castling: boolean = false) {
   let boxPosition = box.getComponent(Transform).position
 
   if (currentInHand) {
@@ -119,7 +119,8 @@ function placePiece(box: IEntity) {
         prevPos: prevPos?.uuid,
         newPos: box.uuid,
         pieceTaken: box.getComponent(BoardCellFlag).piece ? box.getComponent(BoardCellFlag).piece?.uuid : null,   // we taken piece, so revert two moves
-        firstMove: currentInHand.getComponent(PieceFlag).moved ? false : true   // if it was moved for a first time revert moved to false
+        firstMove: currentInHand.getComponent(PieceFlag).moved ? false : true,   // if it was moved for a first time revert moved to false
+        castling: castling   // if so, undo twice
       }
       currentInHand.getComponent(PieceFlag).moved = true
       moveCounter++
@@ -396,8 +397,22 @@ function castleMove(rook: IEntity, newRookBoxIndex: number, oldRookBoxIndex: num
   rook.getComponent(PieceFlag).moved = false
   boxGroup.entities[oldRookBoxIndex].getComponent(BoardCellFlag).vacant = true
   boxGroup.entities[oldRookBoxIndex].getComponent(BoardCellFlag).piece = null
+  boxGroup.entities[newRookBoxIndex].getComponent(BoardCellFlag).vacant = false
+  boxGroup.entities[newRookBoxIndex].getComponent(BoardCellFlag).piece = rook
+
+  // save to history
+  moveHistory[moveCounter] = {
+    id: rook.uuid,
+    prevPos: boxGroup.entities[oldRookBoxIndex].uuid,
+    newPos: boxGroup.entities[newRookBoxIndex].uuid,
+    pieceTaken: null,   // no piece taken in castling
+    firstMove: true,   // castling possible only on the first move
+    castling: true   // if so, undo twice
+  }
+  moveCounter++
+
   // move king
-  placePiece(boxGroup.entities[newKingBoxIndex])
+  placePiece(boxGroup.entities[newKingBoxIndex], true)
 }
 
 sceneMessageBus.on('takePiece', (info) => {
@@ -492,12 +507,18 @@ undoButton.addComponent(new OnPointerDown(() => {
 
 sceneMessageBus.on("undoButton", () => {
   resetSound.getComponent(AudioSource).playOnce()
-  const last = moveHistory.pop()
+  let last = moveHistory.pop()
   revertMove(last.id, last.prevPos, last.newPos, last.firstMove)
   if (last.pieceTaken) {
     revertTaken(last.pieceTaken, last.newPos)
   }
   redoHistory.push(last)
+
+  if (last.castling) {
+    last = moveHistory.pop()
+    revertMove(last.id, last.prevPos, last.newPos, last.firstMove)
+    redoHistory.push(last)
+  }
 })
 
 redoButton.addComponent(new OnPointerDown(() => {
@@ -511,12 +532,18 @@ redoButton.addComponent(new OnPointerDown(() => {
 
 sceneMessageBus.on("redoButton", () => {
   resetSound.getComponent(AudioSource).playOnce()
-  const last = redoHistory.pop()
+  let last = redoHistory.pop()
   revertMove(last.id, last.newPos, last.prevPos, last.firstMove, true)
   if (last.pieceTaken) {
     revertToOutside(last.pieceTaken)
   }
   moveHistory.push(last)
+
+  if (last.castling) {
+    last = redoHistory.pop()
+    revertMove(last.id, last.newPos, last.prevPos, last.firstMove, true)
+    moveHistory.push(last)
+  }
 })
 
 function revertMove(pieceId: string, revertToId: string, revertFromId: string, firstMove: boolean, redo: boolean = false) {
