@@ -10,6 +10,18 @@ import { addBillboard } from "billboard"
 import { spawnElevators } from "elevators"
 import { sceneMessageBus } from "messageBus"
 import { ScaleDownData, scaleSystemInit, ScaleUpData } from "scaleUpDown"
+import { monk } from "./NPC/monk";    // initialize on load
+import { Like } from "./Like/Like"
+
+
+const like = new Like(
+  {
+    position: new Vector3(14, 0.75, 0.5),
+    rotation: Quaternion.Euler(0, 0, 0),
+  },
+  '61b90613dd08def8380ababb'
+)
+
 
 const WHITE = "white"
 const BLACK = "black"
@@ -69,12 +81,12 @@ addBillboard(
 const board = spawnEntity(new GLTFShape("models/Numbered_board.glb"), new Vector3(8, 0, 8), defaultScale) 
 const pol = spawnEntity(new GLTFShape("models/Ground.glb"), new Vector3(8, 0, 8), defaultScale)
 const neonInt = spawnEntity(new GLTFShape("models/Neon_interior.glb"), new Vector3(7.9, 0, 9), defaultScale, new Quaternion(0, 180)) 
-const gambitBoard = spawnEntity(new GLTFShape("models/Tablica.glb"), new Vector3(0.8, 0, 8), defaultScale)
-gambitBoard.getComponent(Transform).rotate(new Vector3(0, 1, 0), 90)
+// const gambitBoard = spawnEntity(new GLTFShape("models/Tablica.glb"), new Vector3(0.8, 0, 8), defaultScale)
+// gambitBoard.getComponent(Transform).rotate(new Vector3(0, 1, 0), 90)
 const cornerPillar = spawnEntity(new GLTFShape("models/stolb.glb"), new Vector3(15.35, 0, 15.35), defaultScale)
 const wall_left = spawnEntity(new GLTFShape("models/Wall_on_left_side.glb"), new Vector3(0.25, 0, 8), defaultScale, Quaternion.Euler(0, 90, 0))
 
-const robot = spawnEntity(new GLTFShape("models/Robot_final.glb"), new Vector3(2.5, 0, 2), defaultScale, Quaternion.Euler(0, 180, 0))
+// const robot = spawnEntity(new GLTFShape("models/Robot_final.glb"), new Vector3(2.5, 0, 2), defaultScale, Quaternion.Euler(0, 180, 0))
 
 @Component("boardCellFlag")
 export class BoardCellFlag {
