@@ -1,10 +1,11 @@
 import { NPC } from '@dcl/npc-scene-utils'
+import resources from '../../resources'
 import { config } from './config'
 import { MonkDialog } from './dialog'
 
 export const monk = new NPC(
-  {position: config.position,rotation: config.rotation},
-  'models/Robot_final.glb',
+  { position: config.position, rotation: config.rotation },
+  resources.robot,
   () => {
     // animations
     // monk.playAnimation('Hello', true, 2)
@@ -18,7 +19,7 @@ export const monk = new NPC(
     // engine.addEntity(dummyent)
 
     // sound
-    monk.addComponentOrReplace(new AudioSource(new AudioClip('sounds/monk.mp3')))
+    monk.addComponentOrReplace(new AudioSource(new AudioClip(resources.monkSound)))
     monk.getComponent(AudioSource).playOnce()
 
     // dialog UI
@@ -29,7 +30,7 @@ export const monk = new NPC(
     hoverText: config.hovertext,
     reactDistance: config.reactDistance,
     portrait: {
-      path: `images/portraits/${config.portraits}`,
+      path: resources.robotImage,
       height: 256,
       width: 256,
       section: {

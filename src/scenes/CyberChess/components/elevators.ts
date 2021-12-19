@@ -1,7 +1,9 @@
-import { spawnEntity, initSound } from "helpers"
 import * as utils from '@dcl/ecs-scene-utils'
-// Elevator logic
+import {VECTOR_OFFSET} from 'offsets'
+import { spawnEntity, initSound } from "src/scenes/CyberChess/components/helpers"
+import resources from '../resources'
 
+// Elevator logic
 @Component("lerpData")
 export class LerpData {
   origin: Vector3 = Vector3.Zero()
@@ -30,16 +32,16 @@ export class LerpMove implements ISystem {
 
 const LerpMoveSystem = new LerpMove() 
 
-const ethOrigin = new Vector3(8, 0, 2)
-const bnbOrigin = new Vector3(8, 0, 14)
+const ethOrigin = new Vector3(8, 0, 2).add(VECTOR_OFFSET)
+const bnbOrigin = new Vector3(8, 0, 14).add(VECTOR_OFFSET)
 
-const elevatorSound = initSound("sounds/elevator.mp3")
+const elevatorSound = initSound(resources.elevatorSound)
 
 @Component("isElevator")
 export class IsElevator {}
 
 function initElevator(origin: Vector3, side: string) {
-  const elevator = spawnEntity(new GLTFShape("models/Elevator.glb"), origin, new Vector3(1, 1, 1))
+  const elevator = spawnEntity(new GLTFShape(resources.elevator), origin, new Vector3(1, 1, 1))
   if (side == "eth") {
     elevator.getComponent(Transform).rotate(new Vector3(0, 1, 0), 180)
   }

@@ -1,3 +1,5 @@
+import resources from "../../resources"
+
 const sceneMessageBus = new MessageBus()
 const server = 'https://art-fest-server.herokuapp.com/scenes/'
 
@@ -10,7 +12,7 @@ export class Like extends Entity {
     super()
     engine.addEntity(this)
 
-    this.addComponent(new GLTFShape('models/heart.glb'))
+    this.addComponent(new GLTFShape(resources.heart))
     this.addComponent(new Transform(transform))
     
     // Like counter

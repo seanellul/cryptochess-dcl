@@ -16,12 +16,12 @@ export function addBillboard(src: string, transform: Transform): void {
     screen.addComponent(transform)
     screen.addComponent(myMaterial)
     screen.addComponent(
-    new OnPointerDown(() => {
-        myVideoTexture.playing = !myVideoTexture.playing
-    })
+        new OnPointerDown(() => {
+            myVideoTexture.playing = !myVideoTexture.playing
+        })
     )
     if (screen.hasComponent(OnPointerDown))
-    screen.removeComponent(OnPointerDown)
+        screen.removeComponent(OnPointerDown)
     engine.addEntity(screen)
     myVideoTexture.loop = true
     myVideoTexture.play()

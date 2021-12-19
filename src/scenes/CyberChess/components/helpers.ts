@@ -1,24 +1,24 @@
-
+import { VECTOR_OFFSET } from 'offsets'
 export function initSound(path: string) {
-    const entity =  new Entity()
-    engine.addEntity(entity)
-    entity.addComponent(
-        new AudioSource(new AudioClip(path))
-    )
-    entity.getComponent(AudioSource).volume = 0.3
+  const entity = new Entity()
+  engine.addEntity(entity)
+  entity.addComponent(
+    new AudioSource(new AudioClip(path))
+  )
+  entity.getComponent(AudioSource).volume = 0.3
 
-    entity.setParent(Attachable.AVATAR)
-    return entity
+  entity.setParent(Attachable.AVATAR)
+  return entity
 }
 
 export function spawnEntity(shape: Shape, position: Vector3, scale: Vector3, rotation?: Quaternion) {
-    const entity = new Entity()
-    
-    entity.addComponent(new Transform({ position: position, scale: scale, rotation }))
-    entity.addComponent(shape)
-    engine.addEntity(entity)
-    
-    return entity
+  const entity = new Entity()
+
+  entity.addComponent(new Transform({ position: position, scale: scale, rotation }))
+  entity.addComponent(shape)
+  engine.addEntity(entity)
+
+  return entity
 }
 
 
@@ -37,16 +37,16 @@ export const nextValidOutsideBlackCell = () => {
 
 
 function initOutsideCells(offsetX: number, offsetZ: number) {
-  let list = [] 
+  let list = []
   for (let i = 0; i < 2; i++) {
-    for (let j = 0; j < 10; j++){
+    for (let j = 0; j < 10; j++) {
       if (j != 4 && j != 5) {
-        list.push(new Vector3(offsetX + j ,0, offsetZ - i))
+        list.push(new Vector3(offsetX + j, 0, offsetZ - i).add(VECTOR_OFFSET))
         // spawnEntity(new BoxShape(), new Vector3(offsetX + j ,0, offsetZ - i))
       }
     }
   }
-  return list  
+  return list
 }
 
 let outsideCellsWhite = initOutsideCells(3.5, 14)
