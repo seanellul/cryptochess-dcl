@@ -1,3 +1,3 @@
-import { createCyberChess } from "scenes/CyberChess/main"
+import { createCryptoChess } from "scenes/CryptoChess/main"
 
-createCyberChess()
+createCryptoChess()

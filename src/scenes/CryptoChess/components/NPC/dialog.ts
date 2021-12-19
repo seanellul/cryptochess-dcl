@@ -3,7 +3,7 @@ import { Dialog } from '@dcl/npc-scene-utils'
 export const MonkDialog: Dialog[] = [
   // #0
   {
-    text: "Hi, I'm RoVi - welcome to CyberChess",
+    text: "Hi, I'm RoVi - welcome to CryptoChess",
   },
   // #1
   {
@@ -22,7 +22,7 @@ export const MonkDialog: Dialog[] = [
   },
   // #3
   {
-    text: "You got into CyberChess, created by the Verse Impact team. My developers made chess in the Cyberpunk style.",
+    text: "You got into CryptoChess, created by the Verse Impact team. My developers made chess in the Cyberpunk style.",
   },
   // #4
   {

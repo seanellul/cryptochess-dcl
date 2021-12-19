@@ -1,6 +1,6 @@
 import * as utils from '@dcl/ecs-scene-utils'
 import {VECTOR_OFFSET} from 'offsets'
-import { spawnEntity, initSound } from "src/scenes/CyberChess/components/helpers"
+import { spawnEntity, initSound } from "helpers"
 import resources from '../resources'
 
 // Elevator logic

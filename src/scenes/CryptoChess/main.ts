@@ -1,5 +1,6 @@
+import * as utils from '@dcl/ecs-scene-utils'
 import resources from 'resources'
-import { VECTOR_OFFSET } from 'components/offsets'
+import { OFFSET_X, VECTOR_OFFSET } from 'components/offsets'
 import {
     initSound,
     spawnEntity,
@@ -68,7 +69,7 @@ export class FloatMove implements ISystem {
 }
 
 
-export function createCyberChess(): void {
+export function createCryptoChess(): void {
 
     const like = new Like(
         {
@@ -99,7 +100,32 @@ export function createCyberChess(): void {
     const background = initSound(resources.backgroundSound)
 
     background.getComponent(AudioSource).loop = true
-    background.getComponent(AudioSource).playing = true
+    // background.getComponent(AudioSource).playing = true
+
+    // make music local
+    const MusicTrigger = new Entity()
+    MusicTrigger.addComponent(
+        new Transform({ position: new Vector3(0, 0, 0) })   // doesn't let me to add offset position
+    )
+
+    let chessMusicTriggerBox = new utils.TriggerBoxShape(
+        new Vector3(16, 16, 16),
+        new Vector3(8, 0, 8).add(VECTOR_OFFSET)
+    )
+    MusicTrigger.addComponent(
+        new utils.TriggerComponent(
+            chessMusicTriggerBox, //shape
+        {
+            onCameraEnter: () => {
+                background.getComponent(AudioSource).playing = true
+            },
+            onCameraExit: () => {
+                background.getComponent(AudioSource).playing = false
+            },
+        }
+        )
+    )
+    engine.addEntity(MusicTrigger)
 
 
     const pieceHeight = 0.1
