@@ -27,8 +27,9 @@ export const monk = new NPC(
   },
   {
     faceUser: false,
-    hoverText: config.hovertext,
+    // hoverText: config.hovertext,    // not used
     reactDistance: config.reactDistance,
+    onlyExternalTrigger: true,
     portrait: {
       path: resources.robotImage,
       height: 256,

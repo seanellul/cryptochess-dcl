@@ -1,6 +1,7 @@
 import * as utils from '@dcl/ecs-scene-utils'
+import * as ui from '@dcl/ui-scene-utils'
 import resources from 'resources'
-import { OFFSET_X, VECTOR_OFFSET } from 'components/offsets'
+import { VECTOR_OFFSET } from 'components/offsets'
 import {
     initSound,
     spawnEntity,
@@ -14,6 +15,7 @@ import { sceneMessageBus } from "components/messageBus"
 import { scaleSystemInit, ScaleUpData } from "components/scaleUpDown"
 import { monk } from "./components/NPC/monk";    // initialize on load
 import { Like } from "./components/Like/Like"
+import { MonkDialog } from './components/NPC/dialog'
 
 
 @Component("boardCellFlag")
@@ -79,6 +81,12 @@ export function createCryptoChess(): void {
         '61b90613dd08def8380ababb'
     )
 
+    monk.addComponent(new OnPointerDown(()=>{
+        if (monk.state !== "talking" || !monk.dialog.isDialogOpen)
+            monk.activate()
+    }, {
+        hoverText: "Talk with RoVi"
+    }))
 
     const WHITE = "white"
     const BLACK = "black"
@@ -115,14 +123,14 @@ export function createCryptoChess(): void {
     MusicTrigger.addComponent(
         new utils.TriggerComponent(
             chessMusicTriggerBox, //shape
-        {
-            onCameraEnter: () => {
-                background.getComponent(AudioSource).playing = true
-            },
-            onCameraExit: () => {
-                background.getComponent(AudioSource).playing = false
-            },
-        }
+            {
+                onCameraEnter: () => {
+                    background.getComponent(AudioSource).playing = true
+                },
+                onCameraExit: () => {
+                    background.getComponent(AudioSource).playing = false
+                },
+            }
         )
     )
     engine.addEntity(MusicTrigger)
@@ -631,7 +639,19 @@ export function createCryptoChess(): void {
 
     // Reset game
     restartButton.addComponent(new OnPointerDown((e) => {
-        sceneMessageBus.emit("reset", {})
+        let prompt = new ui.OptionPrompt(
+            'Reset the Board?',
+            'Are you sure you want to reset the Board? This cannot be undone!',
+            () => {
+                log(`No Reset`)
+            },
+            () => {
+                sceneMessageBus.emit("reset", {})
+            },
+            'No',
+            'Reset'
+        )
+        
     }, {
         hoverText: "Reset the board"
     }))

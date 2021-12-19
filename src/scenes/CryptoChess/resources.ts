@@ -41,7 +41,7 @@ export default {
     elevatorSound: 'sounds/CryptoChess/elevator.mp3',
     monkSound: 'sounds/CryptoChess/monk.mp3',
     pickedupSound: 'sounds/CryptoChess/pickedup.mp3',
-    placedSound: 'sounds/CryptoChess/background.mp3',
+    placedSound: 'sounds/CryptoChess/placed.mp3',
     resetSound: 'sounds/CryptoChess/reset.mp3',
     // videos
     bladerunner3: 'videos/CryptoChess/bladerunner3.mp4',
