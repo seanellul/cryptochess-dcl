@@ -15,7 +15,6 @@ import { sceneMessageBus } from "components/messageBus"
 import { scaleSystemInit, ScaleUpData } from "components/scaleUpDown"
 import { monk } from "./components/NPC/monk";    // initialize on load
 import { Like } from "./components/Like/Like"
-import { MonkDialog } from './components/NPC/dialog'
 
 
 @Component("boardCellFlag")
