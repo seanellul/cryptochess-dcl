@@ -449,6 +449,7 @@ export function createCryptoChess(): void {
 
     // TODO: add move to undo history
     function castleMove(rook: IEntity, newRookBoxIndex: number, oldRookBoxIndex: number, newKingBoxIndex: number) {
+        placedSound.getComponent(AudioSource).playOnce()
         //  move rook
         const b = boxGroup.entities[newRookBoxIndex].getComponent(Transform).position
         rook.getComponent(Transform).position = new Vector3(b.x, pieceHeight, b.z)
