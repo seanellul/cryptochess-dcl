@@ -12,7 +12,7 @@ import { whitePieces, blackPieces } from "components/pieces"
 import { addBillboard } from "components/billboard"
 import { spawnElevators } from "components/elevators"
 import { sceneMessageBus } from "components/messageBus"
-import { scaleSystemInit, ScaleUpData } from "components/scaleUpDown"
+// import { scaleSystemInit, ScaleUpData } from "components/scaleUpDown"
 import { monk } from "./components/NPC/monk";    // initialize on load
 import { Like } from "./components/Like/Like"
 
