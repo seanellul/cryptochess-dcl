@@ -161,19 +161,16 @@ export function createCryptoChess(): void {
     const board = spawnEntity(new GLTFShape(resources.numberedBoard), new Vector3(8, 0, 8).add(VECTOR_OFFSET), defaultScale)
     const pol = spawnEntity(new GLTFShape(resources.ground), new Vector3(8, 0, 8).add(VECTOR_OFFSET), defaultScale)
     const neonInt = spawnEntity(new GLTFShape(resources.neonInterior), new Vector3(7.9, 0, 9).add(VECTOR_OFFSET), defaultScale, new Quaternion(0, 180))
-    // const gambitBoard = spawnEntity(new GLTFShape(resources.tablica), new Vector3(0.8, 0, 8).add(VECTOR_OFFSET), defaultScale)
-    // gambitBoard.getComponent(Transform).rotate(new Vector3(0, 1, 0), 90)
-    const cornerPillar = spawnEntity(new GLTFShape(resources.stolb), new Vector3(15.35, 0, 15.35).add(VECTOR_OFFSET), defaultScale)
     const wall_left = spawnEntity(new GLTFShape(resources.wallLeft), new Vector3(0.25, 0, 8).add(VECTOR_OFFSET), defaultScale, Quaternion.Euler(0, 90, 0))
 
-    // const robot = spawnEntity(new GLTFShape(resources.robot), new Vector3(2.5, 0, 2).add(VECTOR_OFFSET), defaultScale, Quaternion.Euler(0, 180, 0))
-
+    const binanceTileModel = new GLTFShape(resources.binancePlane)
+    const etheriumTileModel = new GLTFShape(resources.etheriumPlane) 
 
     function makeChessBoard() {
         let offset = 3.5
         for (let row = 1; row < 9; row++) {
             for (let col = 1; col < 9; col++) {
-                const tileModel = ((row + col) % 2 == 1) ? new GLTFShape(resources.binancePlane) : new GLTFShape(resources.etheriumPlane)
+                const tileModel = ((row + col) % 2 == 1) ? binanceTileModel : etheriumTileModel
                 let box = spawnEntity(tileModel, new Vector3(offset + col, 0.21, offset + row).add(VECTOR_OFFSET), defaultScale)
                 box.getComponent(Transform).rotate(new Vector3(0, 1, 0), 180)
                 box.addComponent(new BoardCellFlag())
@@ -194,7 +191,6 @@ export function createCryptoChess(): void {
 
             // place back to the same cell and don't loose a turn
             if (prevPos != box) {
-                // TODO: how to handle castling undo? 
                 turn = currentInHand.getComponent(PieceFlag).color == WHITE ? BLACK : WHITE
                 redoHistory = []
                 moveHistory[moveCounter] = {
