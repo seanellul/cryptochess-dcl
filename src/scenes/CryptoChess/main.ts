@@ -137,7 +137,7 @@ export function createCryptoChess(): void {
 
     const pieceHeight = 0.1
     const defaultScale = new Vector3(1, 1, 1)
-    scaleSystemInit()
+    // scaleSystemInit()
 
 
     addBillboard(
@@ -507,20 +507,20 @@ export function createCryptoChess(): void {
 
                 if (i > 47) {
                     let tempPiece = blackPieces[i - 48]
-                    piece = spawnEntity(tempPiece.model, pos, new Vector3(0, 0, 0), new Quaternion(0, 180))
+                    piece = spawnEntity(tempPiece.model, pos, defaultScale, new Quaternion(0, 180))
                     piece.addComponent(new PieceFlag(BLACK, tempPiece.name, tempPiece.number))
                     if (tempPiece.name == "Pawn")
                         piece.addComponent(new IsPawn())
                 } else if (i < 16) {
-                    piece = spawnEntity(whitePieces[i].model, pos, new Vector3(0, 0, 0),)
+                    piece = spawnEntity(whitePieces[i].model, pos, defaultScale,)
                     piece.addComponent(new PieceFlag(WHITE, whitePieces[i].name, whitePieces[i].number))
                     if (whitePieces[i].name == "Pawn")
                         piece.addComponent(new IsPawn())
                 }
 
-                if (piece) {
-                    piece!.addComponent(new ScaleUpData())
-                }
+                // if (piece) {
+                //     piece!.addComponent(new ScaleUpData())
+                // }
 
                 box.getComponent(BoardCellFlag).piece = piece
             }
