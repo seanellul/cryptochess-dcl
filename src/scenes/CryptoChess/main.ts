@@ -90,6 +90,14 @@ export function createCryptoChess(): void {
     const WHITE = "white"
     const BLACK = "black"
 
+    let initPiecePos: Vector3[] = []
+
+    type BoxData = {
+        vacant: boolean
+        piece: IEntity|null
+    }
+    let initBoxData: BoxData[] = []
+
     let currentInHand: any = null
     let prevPos: IEntity | null = null
     let turn: string = WHITE
@@ -182,7 +190,6 @@ export function createCryptoChess(): void {
 
     function placePiece(box: IEntity, castling: boolean = false) {
         let boxPosition = box.getComponent(Transform).position
-
         if (currentInHand) {
             currentInHand.getComponent(Transform).position = new Vector3(boxPosition.x, pieceHeight, boxPosition.z)
             currentInHand.setParent(null)
@@ -654,17 +661,35 @@ export function createCryptoChess(): void {
 
     function reset() {
         resetSound.getComponent(AudioSource).playOnce()
-        while (boxGroup.entities.length) {
-            engine.removeEntity(boxGroup.entities[0])
-        }
-        while (pieceGroup.entities.length) {
-            engine.removeEntity(pieceGroup.entities[0])
-        }
 
         moveHistory = []
         redoHistory = []
 
-        initBoard()
+
+        for (const i in initPiecePos) {
+            let k = Number(i)
+            pieceGroup.entities[k].setParent(null)
+
+            pieceGroup.entities[k].getComponent(Transform).position = initPiecePos[k]
+            pieceGroup.entities[k].getComponent(PieceFlag).active = true
+            pieceGroup.entities[k].getComponent(PieceFlag).moved = false
+            pieceGroup.entities[k].getComponent(PieceFlag).ousideCell = null
+        }
+
+        for (const i in boxGroup.entities) {
+            let k = Number(i)
+
+            boxGroup.entities[k].getComponent(BoardCellFlag).vacant = initBoxData[k].vacant
+            boxGroup.entities[k].getComponent(BoardCellFlag).piece = initBoxData[k].piece
+        }
+
+        turn = WHITE;
+        currentInHand = null
+
+        enableInteractableBox(false)
+        enableInteractableEnemy(false)
+        enableInteractablePiece(true);
+
     }
 
     sceneMessageBus.on("reset", () => { reset() })
@@ -675,6 +700,14 @@ export function createCryptoChess(): void {
         makeChessBoard();
         addPieces();
         enableInteractablePiece(true);
+
+        for (const piece of pieceGroup.entities) {
+            initPiecePos!.push(piece.getComponent(Transform).position)
+        }
+
+        for (const box of boxGroup.entities) {
+            initBoxData.push({vacant: box.getComponent(BoardCellFlag).vacant, piece: box.getComponent(BoardCellFlag).piece})
+        }
     }
 
     initBoard()
