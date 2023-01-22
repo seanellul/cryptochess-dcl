@@ -880,6 +880,11 @@ code will pop the second move from the redoHistory array and revert the move. */
     enableInteractablePiece(true);
   }
 
+/**
+ * It takes a piece and a board cell, and puts the piece back on the board cell
+ * @param {string} pieceId - The id of the piece to revert.
+ * @param {string} revertToId - The id of the box that the piece should be reverted to.
+ */
   function revertTaken(pieceId: string, revertToId: string) {
     const piece = pieceGroup.entities.filter((piece) => {
       return piece.uuid == pieceId;
@@ -895,6 +900,12 @@ code will pop the second move from the redoHistory array and revert the move. */
     revertTo.getComponent(BoardCellFlag).piece = piece;
     revertTo.getComponent(BoardCellFlag).vacant = false;
   }
+
+
+/**
+ * It takes a piece's id, finds the piece, and moves it back to its original position
+ * @param {string} pieceId - the id of the piece to be reverted
+ */
   function revertToOutside(pieceId: string) {
     const piece = pieceGroup.entities.filter((piece) => {
       return piece.uuid == pieceId;
@@ -905,6 +916,13 @@ code will pop the second move from the redoHistory array and revert the move. */
   }
 
   // Reset game
+
+  /* Adding a component to the restartButton entity. The component is an OnPointerDown component. The
+  OnPointerDown component is a component that listens for a pointer down event. When the pointer
+  down event is triggered, it will execute the code in the first parameter. The first parameter is a
+  function that will create a new OptionPrompt. The OptionPrompt is a prompt that will ask the user
+  if they want to reset the board. If the user clicks the "Reset" button, it will emit a message to
+  the sceneMessageBus. The message will be "reset" */
   restartButton.addComponent(
     new OnPointerDown(
       (e) => {
@@ -927,6 +945,9 @@ code will pop the second move from the redoHistory array and revert the move. */
     )
   );
 
+/**
+ * This resets the game
+ */
   function reset() {
     resetSound.getComponent(AudioSource).playOnce();
 
@@ -960,10 +981,14 @@ code will pop the second move from the redoHistory array and revert the move. */
     enableInteractablePiece(true);
   }
 
+ /* Listening for the reset event and calling the reset function when it is triggered. */
   sceneMessageBus.on("reset", () => {
     reset();
   });
 
+/**
+ * It initializes the board
+ */
   function initBoard(): void {
     turn = WHITE;
     currentInHand = null;
@@ -983,5 +1008,6 @@ code will pop the second move from the redoHistory array and revert the move. */
     }
   }
 
+/* Creates a new board. */
   initBoard();
 }
