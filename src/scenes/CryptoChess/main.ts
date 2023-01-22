@@ -312,8 +312,15 @@ the placePiece function with the box that was found. */
         placePiece(newBox)
     })
 
+    /* Getting the component group of all entities with the PieceFlag component. */
     const pieceGroup = engine.getComponentGroup(PieceFlag)
 
+/**
+ * If the piece is interactable, is the same color as the current turn, and is active, then add an
+ * OnPointerDown component to the piece
+ * @param {boolean} interactable - boolean - This is the boolean that determines whether the piece is
+ * interactable or not.
+ */
     function enableInteractablePiece(interactable: boolean) {
 
         for (let piece of pieceGroup.entities) {
@@ -323,6 +330,8 @@ the placePiece function with the box that was found. */
                 piece.getComponent(PieceFlag).active == true
             ) {
 
+/* The above code is a function that is called when the player clicks on a piece. It plays a sound,
+sets the piece to be in the player's hand, and sets the piece's previous position to be vacant. */
                 let pieceOnClick = new OnPointerDown(() => {
                     pickupSound.getComponent(AudioSource).playOnce()
 
@@ -361,6 +370,9 @@ the placePiece function with the box that was found. */
             }
         }
     }
+/* The above code is listening for the "pickupPiece" message. When the message is received, the code
+disables the interactable piece, sets the currentInHand variable to the piece that was picked up,
+and then sets the previous position of the piece to the box that it was on. */
     sceneMessageBus.on("pickupPiece", (info) => {
         enableInteractablePiece(false)
         currentInHand = pieceGroup.entities.filter((piece) => { return piece.uuid == info.currentInHand })[0]
@@ -377,30 +389,49 @@ the placePiece function with the box that was found. */
     })
 
     // and to castle the king
+/**
+ * It enables the interactable enemy pieces when the player is in the "takePiece" state
+ * @param {boolean} interactable - boolean - if true, the enemy pieces will be interactable
+ */
     function enableInteractableEnemy(interactable: boolean) {
+        /* Iterating through the entities in the pieceGroup. */
         for (let piece of pieceGroup.entities) {
+            /* Checking if the piece is interactable, if the piece is not the same color as the turn,
+            and if the piece is active. */
             if (
                 interactable &&
                 piece.getComponent(PieceFlag).color != turn &&
                 piece.getComponent(PieceFlag).active == true
             ) {
 
+                /* A function that is called when a piece is clicked. */
                 let pieceOnClick = new OnPointerDown(() => {
 
+                    /* Finding the box that has the piece that was clicked on. */
                     const box = boxGroup.entities.filter((box) => { return box.getComponent(BoardCellFlag).piece! == piece })[0]
                     eathenSound.getComponent(AudioSource).playOnce()
 
+                    /* Emitting a message to the scene message bus. */
                     sceneMessageBus.emit("takePiece", { pieceId: piece.uuid, boxId: box.uuid, prevPos: prevPos?.uuid, currentInHand: currentInHand?.uuid })
 
+                    /* Calling the placePiece function and passing in the box variable. */
                     placePiece(box)
                 },
                     {
+                        /* Creating a hover text which prompts the taking of the specific piece. */
                         hoverText: "Take the enemy " + piece.getComponent(PieceFlag).name,
                         distance: 16
                     })
 
+                /* Adding the pieceOnClick OnPointerDown component to the piece. */
                 piece.addComponent(pieceOnClick)
-            } else if (  // for castle the king
+
+            } 
+            
+            /* Checking if the piece is interactable, if the piece is the same color as the turn, if
+            the piece is active, if the piece is a rook, if the rook hasn't moved, if the piece in
+            hand is a king, and if the king hasn't moved. */
+            else if (  // for castle the king
                 interactable &&
                 piece.getComponent(PieceFlag).color == turn &&    // same color
                 piece.getComponent(PieceFlag).active == true &&
