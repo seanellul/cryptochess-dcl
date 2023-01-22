@@ -210,6 +210,10 @@ respectively. */
     const binanceTileModel = new GLTFShape(resources.binancePlane)
     const etheriumTileModel = new GLTFShape(resources.etheriumPlane) 
 
+/**
+ * > For each row and column, spawn a tile entity at the appropriate location and add a BoardCellFlag
+ * component to it
+ */
     function makeChessBoard() {
         let offset = 3.5
         for (let row = 1; row < 9; row++) {
