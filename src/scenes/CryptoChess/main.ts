@@ -281,6 +281,7 @@ respectively. */
  */
     function enableInteractableBox(interactable: boolean) {
 
+        /* Adding an OnPointerDown component to each box in the boxGroup.entities array. */
         for (let box of boxGroup.entities) {
             if (interactable && box.getComponent(BoardCellFlag).vacant) {
                 let boxOnClick = new OnPointerDown(() => {
@@ -303,6 +304,9 @@ respectively. */
         }
     }
 
+/* The code below is listening for a message on the sceneMessageBus. When it receives the message, it
+will filter the boxGroup for the box with the uuid that was sent in the message. It will then call
+the placePiece function with the box that was found. */
     sceneMessageBus.on('placePiece', (info: any) => {
         const newBox = boxGroup.entities.filter((box) => { return box.uuid == info.buuid })[0]
         placePiece(newBox)
