@@ -226,17 +226,25 @@ respectively. */
         }
     }
 
+/* Getting the component group of all entities that have the BoardCellFlag component. */
     const boxGroup = engine.getComponentGroup(BoardCellFlag)
 
+/**
+ * placePiece places the held board piece to the board cell, updates the history, and enables/disables
+ * interactable objects.
+ * @param {IEntity} box - IEntity - the box we're placing the piece on
+ * @param {boolean} [castling=false] - boolean = false - if we are castling, we need to revert two
+ * moves
+ */
     function placePiece(box: IEntity, castling: boolean = false) {
         let boxPosition = box.getComponent(Transform).position
         if (currentInHand) {
             currentInHand.getComponent(Transform).position = new Vector3(boxPosition.x, pieceHeight, boxPosition.z)
             currentInHand.setParent(null)
 
-            currentInHand.getComponent(GLTFShape).isPointerBlocker = true
+           currentInHand.getComponent(GLTFShape).isPointerBlocker = true
 
-            // place back to the same cell and don't loose a turn
+/* Saving the move to the history to place the piece back to the same cell and avoid losing a turn */
             if (prevPos != box) {
                 turn = currentInHand.getComponent(PieceFlag).color == WHITE ? BLACK : WHITE
                 redoHistory = []
@@ -253,17 +261,24 @@ respectively. */
             }
             prevPos = null
 
+            /* Setting the vacant flag to false and setting the piece to the currentInHand. */
             box.getComponent(BoardCellFlag).vacant = false
             box.getComponent(BoardCellFlag).piece = currentInHand
             currentInHand = null
 
         }
 
+        /* Enabling the interactable piece. */
         enableInteractableBox(false)
         enableInteractableEnemy(false)
         enableInteractablePiece(true)
     }
 
+/**
+ * > If the box is interactable, add an OnPointerDown component to it
+ * @param {boolean} interactable - boolean - This is a boolean that determines whether the box is
+ * interactable or not.
+ */
     function enableInteractableBox(interactable: boolean) {
 
         for (let box of boxGroup.entities) {
