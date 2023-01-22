@@ -17,6 +17,8 @@ import { monk } from "./components/NPC/monk";    // initialize on load
 import { Like } from "./components/Like/Like"
 
 
+/* A BoardCellFlag is a flag that indicates whether a board cell is vacant or not, and if not, what
+piece is occupying it. */
 @Component("boardCellFlag")
 export class BoardCellFlag {
     vacant: boolean
@@ -26,7 +28,7 @@ export class BoardCellFlag {
         this.piece = piece
     }
 }
-
+/* pieceFlag is a class that holds the information about a piece */
 @Component("pieceFlag")
 export class PieceFlag {
     color: string
@@ -52,9 +54,17 @@ export class PieceFlag {
     }
 }
 
+/* "This class is a component that is used to mark a pawn as a pawn."
+
+The @Component decorator is a function that takes a string as an argument. This string is the name
+of the component */
 @Component("isPawn")
 export class IsPawn { }
 
+/* "Every 30 seconds, the pawns will move up and down in a sine wave pattern."
+
+The first thing to notice is that the class implements the ISystem interface. This is required for
+all systems */
 let fraction = 0
 export class FloatMove implements ISystem {
     pawnGroup = engine.getComponentGroup(IsPawn)
@@ -69,9 +79,14 @@ export class FloatMove implements ISystem {
     }
 }
 
+/**
+ * CreateCryptoChess is the main function used to 
+ * create a chess board with pieces that can be moved around.
+ */
 
 export function createCryptoChess(): void {
 
+/* Creating a new Like object. */
     const like = new Like(
         {
             position: new Vector3(14, 0.75, 0.5).add(VECTOR_OFFSET),
@@ -80,6 +95,10 @@ export function createCryptoChess(): void {
         '61b90613dd08def8380ababb'
     )
 
+/* Adding a component to the monk entity. The component is called OnPointerDown and it is a function
+that is called when the player clicks on the monk. The function is an arrow function that calls the
+monk's activate function. The arrow function also has a hoverText property that is used to display
+text when the player hovers over the monk. */
     monk.addComponent(new OnPointerDown(()=>{
         if (monk.state !== "talking" || !monk.dialog.isDialogOpen)
             monk.activate()
@@ -87,17 +106,29 @@ export function createCryptoChess(): void {
         hoverText: "Talk with RoVi"
     }))
 
+/* Defining two constants, WHITE and BLACK, and assigning them the values "white" and "black"
+respectively. */
     const WHITE = "white"
     const BLACK = "black"
 
+/* Declaring a variable called initPiecePos and assigning it an empty array of Vector3s. */
     let initPiecePos: Vector3[] = []
 
+/**
+ * `BoxData` is an object with two properties, `vacant` and `piece`, where `vacant` is a boolean and
+ * `piece` is either an `IEntity` or `null`.
+ * 
+ * The `initBoxData` variable is an array of `BoxData` objects.
+ * @property {boolean} vacant - boolean
+ * @property {IEntity|null} piece - The piece that is currently occupying the box.
+ */
     type BoxData = {
         vacant: boolean
         piece: IEntity|null
     }
     let initBoxData: BoxData[] = []
 
+/* Declaring variables. */
     let currentInHand: any = null
     let prevPos: IEntity | null = null
     let turn: string = WHITE
@@ -107,26 +138,29 @@ export function createCryptoChess(): void {
     let redoHistory: any[] = []
 
 
-    // sounds
+/* Initializing the sounds that will be used in the game. */
     const pickupSound = initSound(resources.pickedupSound)
     const eathenSound = initSound(resources.eatenSound)
     const placedSound = initSound(resources.placedSound)
     const resetSound = initSound(resources.resetSound)
     const background = initSound(resources.backgroundSound)
 
+/* Setting the loop property of the AudioSource component to true. */
     background.getComponent(AudioSource).loop = true
     // background.getComponent(AudioSource).playing = true
 
-    // make music local
+/* Creating a new entity and adding a transform component to it. */
     const MusicTrigger = new Entity()
     MusicTrigger.addComponent(
-        new Transform({ position: new Vector3(0, 0, 0) })   // doesn't let me to add offset position
+        new Transform({ position: new Vector3(0, 0, 0) })  
     )
-
+/* Creating a Music trigger box that is 16x16x16 units in size, and is located at the position (8, 0, 8) */
     let chessMusicTriggerBox = new utils.TriggerBoxShape(
         new Vector3(16, 16, 16),
         new Vector3(8, 0, 8).add(VECTOR_OFFSET)
     )
+
+/* Creating a trigger component that will play the background music when the camera enters the trigger box. */
     MusicTrigger.addComponent(
         new utils.TriggerComponent(
             chessMusicTriggerBox, //shape
@@ -148,6 +182,7 @@ export function createCryptoChess(): void {
     // scaleSystemInit()
 
 
+/* Adding a billboard to the scene. */
     addBillboard(
         resources.bladerunner540,
         new Transform({
@@ -166,6 +201,7 @@ export function createCryptoChess(): void {
         })
     )
 
+    /* Creating the board, the ground, the neon interior, the wall, and the tile models. */
     const board = spawnEntity(new GLTFShape(resources.numberedBoard), new Vector3(8, 0, 8).add(VECTOR_OFFSET), defaultScale)
     const pol = spawnEntity(new GLTFShape(resources.ground), new Vector3(8, 0, 8).add(VECTOR_OFFSET), defaultScale)
     const neonInt = spawnEntity(new GLTFShape(resources.neonInterior), new Vector3(7.9, 0, 9).add(VECTOR_OFFSET), defaultScale, new Quaternion(0, 180))
