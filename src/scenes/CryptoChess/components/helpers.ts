@@ -1,4 +1,12 @@
+/* Importing the `VECTOR_OFFSET` constant from the `offsets.ts` file. */
 import { VECTOR_OFFSET } from 'offsets'
+
+/**
+ * Create a new entity, add an audio source component to it, set the volume, and attach it to the
+ * avatar.
+ * @param {string} path - The path to the sound file.
+ * @returns The entity is being returned.
+ */
 export function initSound(path: string) {
   const entity = new Entity()
   engine.addEntity(entity)
@@ -11,6 +19,15 @@ export function initSound(path: string) {
   return entity
 }
 
+/**
+ * It creates an entity, adds a transform component to it, adds a shape component to it, and then adds
+ * the entity to the engine
+ * @param {Shape} shape - The shape component to add to the entity.
+ * @param {Vector3} position - The position of the entity in the world.
+ * @param {Vector3} scale - Vector3 - The size of the entity.
+ * @param {Quaternion} [rotation] - Quaternion
+ * @returns The entity that was created.
+ */
 export function spawnEntity(shape: Shape, position: Vector3, scale: Vector3, rotation?: Quaternion) {
   const entity = new Entity()
 
