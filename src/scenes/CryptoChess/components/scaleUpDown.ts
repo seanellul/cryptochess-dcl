@@ -1,3 +1,4 @@
+/* It's a class that holds the data for the scale up animation */
 @Component("scaleUpData")
 export class ScaleUpData {
   origin: number = 0
@@ -6,6 +7,11 @@ export class ScaleUpData {
 }
 
 // a system to carry out the movement
+/* "This system updates the scale of entities in the scaleUpGroup group."
+
+The system is a class that implements the ISystem interface. The ISystem interface is defined in the
+engine and requires that the class have an update method. The update method is called once per frame
+and is passed the time in seconds since the last frame */
 export class ScaleUp implements ISystem {
   update(dt: number) {
     for (let piece of scaleUpGroup.entities) {
@@ -22,6 +28,7 @@ export class ScaleUp implements ISystem {
 
 
 
+/* It's a class that holds the data for a scale down animation */
 @Component("scaleDownData")
 export class ScaleDownData {
   origin: number = 1
@@ -30,6 +37,7 @@ export class ScaleDownData {
 }
 
 // a system to carry out the movement
+/* It's a system that updates the scale of entities in the `scaleDownGroup` group */
 export class ScaleDown implements ISystem {
   update(dt: number) {
     for (let piece of scaleDownGroup.entities) {
@@ -60,6 +68,9 @@ const scaleDownGroup = engine.getComponentGroup(ScaleDownData)
 // engine.addSystem(scaleUpClass)
 
 
+/**
+ * It adds the scaleUpClass and scaleDownClass to the engine.
+ */
 export function scaleSystemInit() {
     engine.addSystem(scaleUpClass)
     engine.addSystem(scaleDownClass)
