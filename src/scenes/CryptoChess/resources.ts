@@ -7,7 +7,7 @@ export default {
     uiButtonF: 'images/CryptoChess/ui/buttonF.png',
     uiDonations: 'images/CryptoChess/ui/donations_UI.png',
     uiTextPanel: 'images/CryptoChess/ui/textPanel.png',
-    // models
+    // models 
     binanceHorse: 'models/CryptoChess/Binance_Horse.glb',
     binanceKing: 'models/CryptoChess/Binance_King.glb',
     binancePawn: 'models/CryptoChess/Binance_peshka.glb',

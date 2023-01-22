@@ -1,3 +1,8 @@
+/**
+ * Creates a video billboard that can be played and paused on click.
+ * @param {string} src - The URL of the video you want to play.
+ * @param {Transform} transform - The position and rotation of the billboard.
+ */
 export function addBillboard(src: string, transform: Transform): void {
     // Video billboard
     // Make it smaller?
